@@ -57,10 +57,10 @@ with open(config_file_name) as config_file:
     MTD = np.concatenate((MTD_0, MTD_1), axis=0)
 
     with open("data.csv", mode="w") as csv_file:
-        fieldnames = ["P0", "Q0", "Qp0", "MTD"]
+        fieldnames = ["P", "Q", "Qp", "MTD"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
         for i, state in enumerate(states):
-            entry = {"P0": state[1], "Q0": state[2], "Qp0": state[3], "MTD": MTD[i]}
+            entry = {"P": state[1], "Q": state[2], "Qp": state[3], "MTD": MTD[i]}
             writer.writerow(entry)
