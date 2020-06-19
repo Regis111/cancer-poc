@@ -44,6 +44,7 @@ def show_param(column, prediction, i):
     plt.xlabel("t")
     plt.plot(range(inputLength), column, label="Real data")
     plt.plot(range(training_end, inputLength), prediction, label="Prediction")
+    plt.legend()
 
 
 plt.figure(figsize=(16, 16))
@@ -61,5 +62,6 @@ plt.subplot(4, 1, 4)
 plt.ylabel("P*(t)")
 plt.plot(range(inputLength), inputData, label="Real data")
 plt.plot(range(training_end, inputLength), MTD_pred, label="Prediction")
+plt.legend()
 
 plt.show()
