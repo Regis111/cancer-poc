@@ -139,3 +139,6 @@ cython_debug/
 
 # generated csv
 *.csv
+
+# Pycharm files
+.idea/
