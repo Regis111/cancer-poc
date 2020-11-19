@@ -35,7 +35,7 @@ with open(config_file_name) as config_file:
     Qp0 = config["initial_state"]["Qp0"]
 
     x0 = np.array([C0, P0, Q0, Qp0])
-    t = np.arange(0.0, 30.0, 0.1)
+    t = np.arange(0.0, 500.0, 0.1)
 
     equations = cancer(config["equation_params"])
 
@@ -48,7 +48,7 @@ with open(config_file_name) as config_file:
     Qp0 = states_0[-1, 3]
 
     x0 = np.array([C0, P0, Q0, Qp0])
-    t = np.arange(30.0, 60.0, 0.1)
+    t = np.arange(500.0, 1000.0, 0.1)
 
     states_1 = odeint(equations, x0, t)
     MTD_1 = states_1[:, 1] + states_1[:, 2] + states_1[:, 3]
@@ -57,10 +57,16 @@ with open(config_file_name) as config_file:
     MTD = np.concatenate((MTD_0, MTD_1), axis=0)
 
     with open("data.csv", mode="w") as csv_file:
-        fieldnames = ["P", "Q", "Qp", "MTD"]
+        fieldnames = ["C", "P", "Q", "Qp", "MTD"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
         for i, state in enumerate(states):
-            entry = {"P": state[1], "Q": state[2], "Qp": state[3], "MTD": MTD[i]}
+            entry = {
+                "C": state[0],
+                "P": state[1],
+                "Q": state[2],
+                "Qp": state[3],
+                "MTD": MTD[i],
+            }
             writer.writerow(entry)
