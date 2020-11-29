@@ -34,14 +34,14 @@ class PatientDetailsView(QWidget):
 
         # right column
         self.back_button = QPushButton("Wstecz")
-        self.add_measurements = QPushButton("Dodaj pomiar")
-        self.prediction = QPushButton("Zobacz Predykcję")
+        self.add_measurements_button = QPushButton("Dodaj pomiar")
+        self.prediction_button = QPushButton("Zobacz Predykcję")
 
         self.right = QVBoxLayout()
         self.right.setMargin(20)
         self.right.addWidget(self.back_button)
-        self.right.addWidget(self.add_measurements)
-        self.right.addWidget(self.prediction)
+        self.right.addWidget(self.add_measurements_button)
+        self.right.addWidget(self.prediction_button)
 
         # whole layout
         self.layout = QHBoxLayout()
