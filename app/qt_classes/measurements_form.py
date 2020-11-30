@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import (
     QWidget,
     QDoubleSpinBox,
-    QDateEdit,
+    QDateTimeEdit,
     QPushButton,
     QFormLayout,
     QHBoxLayout,
@@ -43,7 +43,7 @@ class MeasurementsForm(QWidget):
 
     def saveForm(self):
         ith_layout = lambda i: self.form_layout.itemAt(i).layout()
-        take_date = lambda layout: layout.itemAt(0).widget().date().toPython()
+        take_date = lambda layout: layout.itemAt(0).widget().dateTime().toPython()
         take_measurement = lambda layout: layout.itemAt(1).widget().value()
         layouts = [ith_layout(i) for i in range(self.form_layout.rowCount())]
         dates_values = [(take_date(l), take_measurement(l)) for l in layouts]
@@ -51,7 +51,7 @@ class MeasurementsForm(QWidget):
 
     def addRow(self):
         measurement_layout = QHBoxLayout()
-        measurement_layout.addWidget(self.date_field())
+        measurement_layout.addWidget(self.datetime_field())
         measurement_layout.addWidget(self.measurement_field())
         self.form_layout.addRow(measurement_layout)
 
@@ -65,6 +65,6 @@ class MeasurementsForm(QWidget):
         spin_box.setSingleStep(0.1)
         return spin_box
 
-    def date_field(self):
-        date = QDateEdit()
+    def datetime_field(self):
+        date = QDateTimeEdit()
         return date
