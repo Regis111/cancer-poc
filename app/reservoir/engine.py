@@ -1,13 +1,15 @@
 import datetime
+from typing import Tuple
 
 import numpy as np
-from esn.esn import DeepESN
-from esn import activation
-from esn.initialization import *
 import torch
-from typing import List, Tuple
-from data_model.Measurement import Measurement
+from esn import activation
+from esn.esn import DeepESN
+from esn.initialization import *
 from scipy.interpolate import make_interp_spline
+
+from data_model.Measurement import Measurement
+from util import unzip
 
 np.random.seed(42)
 
@@ -16,7 +18,7 @@ dtype = torch.double
 torch.set_default_dtype(dtype)
 
 
-def create_prediction(measurements: List[Measurement]) -> List[tuple]:
+def create_prediction(measurements: List[Measurement]) -> List[Tuple]:
     """Creates prediction for given measurements.
     Time range of generated predictions is the same as time range of measurements,
     i.e. it starts the day after the last measurement and lasts for the same number of days as
@@ -37,16 +39,13 @@ def _transform_measurements(first_date: datetime.datetime, measurements: List[Me
 
 
 def _interpolate_missing_days(measurements: List[tuple]) -> Tuple[np.ndarray, np.ndarray]:
-    x, y = _unzip(measurements)
+    x, y = unzip(measurements)
     spline_degree = len(x) - 1 if len(x) < 4 else 3
     spline_fun = make_interp_spline(x, y, k=spline_degree)
     dense_x = np.array(list(range(x[0], x[-1] + 1)))
     dense_y = spline_fun(dense_x)
+    dense_y = dense_y.astype(float)
     return dense_x, dense_y
-
-
-def _unzip(iterable):
-    return list(zip(*iterable))
 
 
 def _to_tensor(array: np.ndarray) -> Tensor:
@@ -61,7 +60,8 @@ def _predict(day_offsets: np.ndarray, values: np.ndarray) -> List[tuple]:
                   activation=activation.relu(leaky_rate=0.5), transient=len(day_offsets) // 2)
     esn.fit(x, y)
     y_pred = []
-    p = values[-1:]
+    p = torch.from_numpy(values[-1:])
+    p = torch.reshape(p, (1, 1, 1))
     n = len(day_offsets_pred)
     for _ in range(n):
         p = esn(p)

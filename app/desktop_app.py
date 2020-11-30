@@ -1,17 +1,15 @@
-from qt_classes.measurements_form import MeasurementsForm
+import logging
+import sys
+
 from PySide2.QtWidgets import QApplication, QMainWindow
 
-
+from db.initialize import init
+from qt_classes.measurements_form import MeasurementsForm
 from qt_classes.patient_details import PatientDetailsView
 from qt_classes.patient_form import PatientForm
 from qt_classes.patient_list import PatientListView
-from qt_classes.start import StartView
 from qt_classes.prediction_view import PredictionView
-
-from db.initialize import init
-
-import logging
-import sys
+from qt_classes.start import StartView
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -57,7 +55,8 @@ class Window(QMainWindow):
         self.widget.add_measurements_button.clicked.connect(
             lambda: self.setMeasurementsForm(patient)
         )
-        self.widget.prediction_button.clicked.connect(self.setPredictionView)
+        self.widget.prediction_button.clicked.connect(
+            lambda: self.setPredictionView(patient))
         self.show()
 
     def setMeasurementsForm(self, patient):
@@ -67,9 +66,9 @@ class Window(QMainWindow):
         self.widget.save_button.clicked.connect(lambda: self.setDetailsView(patient))
         self.show()
 
-    def setPredictionView(self):
+    def setPredictionView(self, patient):
         logging.debug("Entering PredictionView")
-        self.widget = PredictionView()
+        self.widget = PredictionView(patient)
         # self.setCentralWidget(self.widget)
         self.widget.show()
 
