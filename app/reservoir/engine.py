@@ -1,16 +1,12 @@
 import datetime
 
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from esn.esn import DeepESN, DeepSubreservoirESN
-from esn import activation as activ
+from esn.esn import DeepESN
+from esn import activation
 from esn.initialization import *
-from scipy.integrate import odeint
 import torch
 from typing import List, Tuple
 from data_model.Measurement import Measurement
-from data_model.Prediction import Prediction
 from scipy.interpolate import make_interp_spline
 
 np.random.seed(42)
@@ -21,14 +17,19 @@ torch.set_default_dtype(dtype)
 
 
 def create_prediction(measurements: List[Measurement]) -> List[tuple]:
-    transformed_measurements = _transform_measurements(measurements)
-    x, y = _interpolate_missing_days(transformed_measurements)
-    return _predict(x, y)
-
-
-def _transform_measurements(measurements: List[Measurement]) -> List[tuple]:
+    """Creates prediction for given measurements.
+    Time range of generated predictions is the same as time range of measurements,
+    i.e. it starts the day after the last measurement and lasts for the same number of days as
+    the difference between first and last measurement.
+    :returns list of tuples (datetime, value)"""
     first_date = min(m.date for m in measurements)
+    transformed_measurements = _transform_measurements(first_date, measurements)
+    x, y = _interpolate_missing_days(transformed_measurements)
+    predictions = _predict(x, y)
+    return _transform_predictions(first_date, predictions)
 
+
+def _transform_measurements(first_date: datetime.datetime, measurements: List[Measurement]) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
 
@@ -53,26 +54,39 @@ def _to_tensor(array: np.ndarray) -> Tensor:
     return torch.from_numpy(reshaped).to(device)
 
 
-def _predict(x: np.ndarray, y: np.ndarray) -> List[tuple]:
-    x_pred = list(range(x[-1] + 1, x[-1] + len(x)))
-    x, y = _to_tensor(y[:-1]), _to_tensor(y[1:])
+def _predict(day_offsets: np.ndarray, values: np.ndarray) -> List[tuple]:
+    day_offsets_pred = list(range(day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets)))
+    x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
     esn = DeepESN(1, 100, initializer=WeightInitializer(), num_layers=3, bias=False,
-                  activation=activ.relu(leaky_rate=0.5), transient=len(x) // 2)
+                  activation=activation.relu(leaky_rate=0.5), transient=len(day_offsets) // 2)
     esn.fit(x, y)
     y_pred = []
-    p = y[-1:]
-    n = len(x_pred)
-    for i in range(n):
+    p = values[-1:]
+    n = len(day_offsets_pred)
+    for _ in range(n):
         p = esn(p)
         p = torch.reshape(p, (1, 1, 1))
         y_pred.append(p.item())
-    return list(zip(x_pred, y_pred))
+    return list(zip(day_offsets_pred, y_pred))
+
+
+def _transform_predictions(first_date: datetime.datetime, predictions: List[tuple]):
+    def offset_to_date(day_offset):
+        return first_date + datetime.timedelta(days=day_offset)
+
+    return [(offset_to_date(off), val) for off, val in predictions]
 
 
 def test():
-    measurements_ = [
-        Measurement(2, datetime.datetime(2020, 11, 25), 15),
+    measurements = [
         Measurement(1, datetime.datetime(2020, 11, 20), 10),
-        Measurement(3, datetime.datetime(2020, 11, 30), 17)
+        Measurement(2, datetime.datetime(2020, 11, 25), 15),
+        Measurement(3, datetime.datetime(2020, 11, 30), 17),
+        Measurement(3, datetime.datetime(2020, 12, 2), 19),
+
     ]
-    print(create_prediction(measurements_))
+    print(create_prediction(measurements))
+
+
+if __name__ == '__main__':
+    test()
