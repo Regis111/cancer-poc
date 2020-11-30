@@ -3,6 +3,9 @@ from datetime import datetime
 from data_model.Prediction import Prediction
 from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection_and_commit
@@ -68,3 +71,4 @@ def delete_all_predictions_for_patient(patient, cursor=None):
         "DELETE FROM PREDICTION WHERE ID=?", [(m.db_id,) for m in patient.predictions]
     )
     patient.predictions.clear()
+    logging.debug(f"Deleted predictions for patient: {patient} with id: {patient.db_id}")

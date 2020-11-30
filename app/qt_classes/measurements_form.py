@@ -9,6 +9,7 @@ from PySide2.QtWidgets import (
     QMessageBox,
 )
 from db.measurement import create_measurements_for_patient
+from db.prediction import delete_all_predictions_for_patient
 from datetime import date
 
 
@@ -48,6 +49,7 @@ class MeasurementsForm(QWidget):
         layouts = [ith_layout(i) for i in range(self.form_layout.rowCount())]
         dates_values = [(take_date(l), take_measurement(l)) for l in layouts]
         create_measurements_for_patient(self.patient, dates_values)
+        delete_all_predictions_for_patient(self.patient)
 
     def addRow(self):
         measurement_layout = QHBoxLayout()
