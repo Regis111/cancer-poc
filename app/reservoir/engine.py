@@ -13,7 +13,7 @@ from util import unzip
 
 np.random.seed(42)
 
-device = torch.device('cpu')
+device = torch.device("cpu")
 dtype = torch.double
 torch.set_default_dtype(dtype)
 
@@ -31,14 +31,18 @@ def generate_prediction(measurements: List[Measurement]) -> List[Tuple]:
     return _transform_predictions(first_date, predictions)
 
 
-def _transform_measurements(first_date: datetime.datetime, measurements: List[Measurement]) -> List[tuple]:
+def _transform_measurements(
+    first_date: datetime.datetime, measurements: List[Measurement]
+) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
 
     return sorted((date_to_offset(m.date), m.value) for m in measurements)
 
 
-def _interpolate_missing_days(measurements: List[tuple]) -> Tuple[np.ndarray, np.ndarray]:
+def _interpolate_missing_days(
+    measurements: List[tuple],
+) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = len(x) - 1 if len(x) < 4 else 3
     spline_fun = make_interp_spline(x, y, k=spline_degree)
@@ -54,10 +58,19 @@ def _to_tensor(array: np.ndarray) -> Tensor:
 
 
 def _predict(day_offsets: np.ndarray, values: np.ndarray) -> List[tuple]:
-    day_offsets_pred = list(range(day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets)))
+    day_offsets_pred = list(
+        range(day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets))
+    )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
-    esn = DeepESN(1, 100, initializer=WeightInitializer(), num_layers=3, bias=False,
-                  activation=activation.relu(leaky_rate=0.5), transient=len(day_offsets) // 2)
+    esn = DeepESN(
+        1,
+        100,
+        initializer=WeightInitializer(),
+        num_layers=3,
+        bias=False,
+        activation=activation.relu(leaky_rate=0.5),
+        transient=len(day_offsets) // 2,
+    )
     esn.fit(x, y)
     y_pred = []
     p = torch.from_numpy(values[-1:])
@@ -83,10 +96,9 @@ def test():
         Measurement(2, datetime.datetime(2020, 11, 25), 15),
         Measurement(3, datetime.datetime(2020, 11, 30), 17),
         Measurement(3, datetime.datetime(2020, 12, 2), 19),
-
     ]
     print(generate_prediction(measurements))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

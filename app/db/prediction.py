@@ -71,4 +71,6 @@ def delete_all_predictions_for_patient(patient, cursor=None):
         "DELETE FROM PREDICTION WHERE ID=?", [(m.db_id,) for m in patient.predictions]
     )
     patient.predictions.clear()
-    logging.debug(f"Deleted predictions for patient: {patient} with id: {patient.db_id}")
+    logging.debug(
+        f"Deleted predictions for patient: {patient} with id: {patient.db_id}"
+    )
