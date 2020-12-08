@@ -28,11 +28,12 @@ class PredictionView(QWidget):
         self.setLayout(self.layout)
 
     def loadPredictions(self):
-        predictions = get_predictions_for_patient_id(self.patient.db_id)
+        predictions = self.patient.predictions
         if not predictions:
             dates_values = generate_prediction(self.patient.measurements)
             predictions = create_predictions_for_patient(self.patient, dates_values)
-        return unzip([(p.date, p.value) for p in predictions])
+        last_prediction_no = max(predictions.keys())
+        return unzip([(p.date, p.value) for p in predictions[last_prediction_no]])
 
     def loadMeasurements(self):
         return unzip([(m.date, m.value) for m in self.patient.measurements])
