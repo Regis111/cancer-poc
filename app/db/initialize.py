@@ -25,6 +25,7 @@ def init():
     cursor.execute(
         """CREATE TABLE IF NOT EXISTS PREDICTION
                    (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    PREDICTION_NO  INT    NOT NULL, 
                     DATE           TEXT   NOT NULL,
                     VALUE          REAL   NOT NULL,
                     PATIENT_ID     INT    NOT NULL,
