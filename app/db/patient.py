@@ -32,7 +32,7 @@ def create_patient(name, surname, cursor=None):
     cursor.execute("INSERT INTO PATIENT(NAME, SURNAME) VALUES (?, ?)", (name, surname))
     logging.debug(f"Inserted patient {name} {surname}")
     patient_id = cursor.lastrowid
-    return Patient(patient_id, name, surname, [], [])
+    return Patient(patient_id, name, surname, [], {})
 
 
 @with_connection_and_commit

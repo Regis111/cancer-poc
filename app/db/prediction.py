@@ -9,28 +9,33 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection_and_commit
-def create_prediction_for_patient(patient, date, value, cursor=None):
+def create_prediction_for_patient(patient, prediction_no, date, value, cursor=None) -> Prediction:
     """Creates a PREDICTION row in db, creates Prediction object and adds it to patient predictions.
     :param patient - Patient class object
+    :param prediction_no - chronological number of prediction
     :param date - datetime object
     :param value - float number
     :param cursor - cursor provided by with_connection_and_commit decorator
     :returns newly created Prediction object
     """
     cursor.execute(
-        "INSERT INTO PREDICTION(DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?)",
-        (date.strftime(DATE_FORMAT), value, patient.db_id),
+        "INSERT INTO PREDICTION(PREDICTION_NO, DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?, ?)",
+        (prediction_no, date.strftime(DATE_FORMAT), value, patient.db_id),
     )
     prediction_id = cursor.lastrowid
     prediction = Prediction(prediction_id, date, value)
-    patient.predictions.append(prediction)
+    if patient.predictions[prediction_no]:
+        patient.predictions[prediction_no] = [prediction]
+    else:
+        patient.predictions[prediction_no].append(prediction)
     return prediction
 
 
 @with_connection_and_commit
-def create_predictions_for_patient(patient, dates_values, cursor=None):
+def create_predictions_for_patient(patient, prediction_no, dates_values, cursor=None) -> list:
     """Creates a PREDICTION rows in db, creates Prediction object and adds it to patient predictions.
     :param patient - Patient class object
+    :param prediction_no - chronological number of prediction
     :param dates_values - iterable of (date, value) tuples
     :param cursor - cursor provided by with_connection_and_commit decorator
     :returns list of newly created Prediction objects
@@ -38,37 +43,33 @@ def create_predictions_for_patient(patient, dates_values, cursor=None):
     predictions = []
     for date, value in dates_values:
         cursor.execute(
-            "INSERT INTO PREDICTION(DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?)",
-            (date.strftime(DATE_FORMAT), value, patient.db_id),
+            "INSERT INTO PREDICTION(PREDICTION_NO, DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?, ?)",
+            (prediction_no, date.strftime(DATE_FORMAT), value, patient.db_id),
         )
         prediction_id = cursor.lastrowid
         predictions.append(Prediction(prediction_id, date, value))
-    patient.predictions += predictions
+    patient.predictions[prediction_no] = predictions
     return predictions
 
 
 @with_connection
-def get_predictions_for_patient_id(patient_id, cursor=None):
+def get_predictions_for_patient_id(patient_id, cursor=None) -> dict:
     """Fetches predictions from db for a given patient_id."""
     cursor.execute("SELECT * FROM PREDICTION WHERE PATIENT_ID=?", (patient_id,))
-    return [
-        Prediction(prediction_id, datetime.strptime(date, DATE_FORMAT), value)
-        for prediction_id, date, value, _ in cursor.fetchall()
-    ]
-
-
-@with_connection_and_commit
-def delete_prediction_for_patient(patient, prediction, cursor=None):
-    """Deletes prediction for given patient both in db and object"""
-    cursor.execute("DELETE FROM PREDICTION WHERE ID=?", (prediction.db_id,))
-    patient.predictions.remove(prediction)
+    predictions = {}
+    for prediction_id, prediction_no, date, value, _ in cursor.fetchall():
+        if predictions[prediction_no]:
+            predictions[prediction_no].append(Prediction(prediction_id, datetime.strptime(date, DATE_FORMAT), value))
+        else:
+            predictions[prediction_no] = [Prediction(prediction_id, datetime.strptime(date, DATE_FORMAT), value)]
+    return predictions
 
 
 @with_connection_and_commit
 def delete_all_predictions_for_patient(patient, cursor=None):
     """Deletes all predictions for given patient both in db and object"""
     cursor.executemany(
-        "DELETE FROM PREDICTION WHERE ID=?", [(m.db_id,) for m in patient.predictions]
+        "DELETE FROM PREDICTION WHERE ID=?", [(p.db_id,) for p in patient.predictions]
     )
     patient.predictions.clear()
     logging.debug(
