@@ -23,7 +23,7 @@ def generate_prediction(measurements: List[Measurement]) -> List[Tuple]:
     Time range of generated predictions is the same as time range of measurements,
     i.e. it starts the day after the last measurement and lasts for the same number of days as
     the difference between first and last measurement.
-    :returns list of tuples (datetime, value)"""
+    :returns list of tuples (date, value)"""
     first_date = min(m.date for m in measurements)
     transformed_measurements = _transform_measurements(first_date, measurements)
     x, y = _interpolate_missing_days(transformed_measurements)
@@ -31,18 +31,14 @@ def generate_prediction(measurements: List[Measurement]) -> List[Tuple]:
     return _transform_predictions(first_date, predictions)
 
 
-def _transform_measurements(
-    first_date: datetime.datetime, measurements: List[Measurement]
-) -> List[tuple]:
+def _transform_measurements(first_date: datetime.date, measurements: List[Measurement]) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
 
     return sorted((date_to_offset(m.date), m.value) for m in measurements)
 
 
-def _interpolate_missing_days(
-    measurements: List[tuple],
-) -> Tuple[np.ndarray, np.ndarray]:
+def _interpolate_missing_days(measurements: List[tuple]) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = len(x) - 1 if len(x) < 4 else 3
     spline_fun = make_interp_spline(x, y, k=spline_degree)
@@ -83,7 +79,7 @@ def _predict(day_offsets: np.ndarray, values: np.ndarray) -> List[tuple]:
     return list(zip(day_offsets_pred, y_pred))
 
 
-def _transform_predictions(first_date: datetime.datetime, predictions: List[tuple]):
+def _transform_predictions(first_date: datetime.date, predictions: List[tuple]):
     def offset_to_date(day_offset):
         return first_date + datetime.timedelta(days=day_offset)
 
@@ -92,10 +88,10 @@ def _transform_predictions(first_date: datetime.datetime, predictions: List[tupl
 
 def test():
     measurements = [
-        Measurement(1, datetime.datetime(2020, 11, 20), 10),
-        Measurement(2, datetime.datetime(2020, 11, 25), 15),
-        Measurement(3, datetime.datetime(2020, 11, 30), 17),
-        Measurement(3, datetime.datetime(2020, 12, 2), 19),
+        Measurement(1, datetime.date(2020, 11, 20), 10),
+        Measurement(2, datetime.date(2020, 11, 25), 15),
+        Measurement(3, datetime.date(2020, 11, 30), 17),
+        Measurement(3, datetime.date(2020, 12, 2), 19),
     ]
     print(generate_prediction(measurements))
 

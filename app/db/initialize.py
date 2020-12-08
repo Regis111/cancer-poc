@@ -24,12 +24,19 @@ def init():
 
     cursor.execute(
         """CREATE TABLE IF NOT EXISTS PREDICTION
+                    (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                     DATE_CREATED   TEXT NOT NULL,
+                     PATIENT_ID     INT NOT NULL,
+                     FOREIGN KEY(PATIENT_ID) REFERENCES PATIENT(ID));"""
+    )
+
+    cursor.execute(
+        """CREATE TABLE IF NOT EXISTS PREDICTION_VALUE
                    (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PREDICTION_NO  INT    NOT NULL, 
                     DATE           TEXT   NOT NULL,
                     VALUE          REAL   NOT NULL,
-                    PATIENT_ID     INT    NOT NULL,
-                    FOREIGN KEY(PATIENT_ID) REFERENCES PATIENT(ID));"""
+                    PREDICTION_ID  INT    NOT NULL,
+                    FOREIGN KEY(PREDICTION_ID) REFERENCES PREDICTION(ID));"""
     )
     conn.close()
     print("DB initialized successfully")
