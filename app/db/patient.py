@@ -1,3 +1,5 @@
+from typing import List
+
 import db.measurement
 import db.prediction
 from data_model.Patient import Patient
@@ -9,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection
-def get_all_patients(cursor=None):
+def get_all_patients(cursor=None) -> List[Patient]:
     """Fetches all patients from db"""
     patients = []
     cursor.execute("SELECT * FROM PATIENT")
@@ -22,7 +24,7 @@ def get_all_patients(cursor=None):
 
 
 @with_connection_and_commit
-def create_patient(name, surname, cursor=None):
+def create_patient(name: str, surname: str, cursor=None) -> Patient:
     """Creates a PATIENT row in db and creates Patient object.
     :param name - patient name
     :param surname - patient surname
@@ -36,7 +38,7 @@ def create_patient(name, surname, cursor=None):
 
 
 @with_connection_and_commit
-def delete_patient(patient, cursor=None):
+def delete_patient(patient: Patient, cursor=None):
     """Deletes patient from db along with its measurements and predictions."""
     db.measurement.delete_all_measurements_for_patient(patient)
     db.prediction.delete_all_predictions_for_patient(patient)

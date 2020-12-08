@@ -1,9 +1,10 @@
+import logging
 from datetime import datetime
 
+from data_model.Patient import Patient
 from data_model.Prediction import Prediction
 from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -32,7 +33,7 @@ def create_prediction_for_patient(patient, prediction_no, date, value, cursor=No
 
 
 @with_connection_and_commit
-def create_predictions_for_patient(patient, prediction_no, dates_values, cursor=None) -> list:
+def create_predictions_for_patient(patient: Patient, prediction_no: int, dates_values: iter, cursor=None) -> list:
     """Creates a PREDICTION rows in db, creates Prediction object and adds it to patient predictions.
     :param patient - Patient class object
     :param prediction_no - chronological number of prediction
@@ -53,7 +54,7 @@ def create_predictions_for_patient(patient, prediction_no, dates_values, cursor=
 
 
 @with_connection
-def get_predictions_for_patient_id(patient_id, cursor=None) -> dict:
+def get_predictions_for_patient_id(patient_id: int, cursor=None) -> dict:
     """Fetches predictions from db for a given patient_id."""
     cursor.execute("SELECT * FROM PREDICTION WHERE PATIENT_ID=?", (patient_id,))
     predictions = {}
@@ -66,7 +67,7 @@ def get_predictions_for_patient_id(patient_id, cursor=None) -> dict:
 
 
 @with_connection_and_commit
-def delete_all_predictions_for_patient(patient, cursor=None):
+def delete_all_predictions_for_patient(patient: Patient, cursor=None):
     """Deletes all predictions for given patient both in db and object"""
     cursor.executemany(
         "DELETE FROM PREDICTION WHERE ID=?", [(p.db_id,) for p in patient.predictions]

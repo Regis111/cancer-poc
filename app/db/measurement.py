@@ -1,15 +1,17 @@
+import logging
 from datetime import datetime
+from typing import List
 
 from data_model.Measurement import Measurement
+from data_model.Patient import Patient
 from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection_and_commit
-def create_measurement_for_patient(patient, date, value, cursor=None):
+def create_measurement_for_patient(patient: Patient, date: datetime, value: float, cursor=None) -> Measurement:
     """Creates a MEASUREMENT row in db, creates Measurement object and adds it to patient measurements.
     :param patient - Patient class object
     :param date - datetime object
@@ -28,7 +30,7 @@ def create_measurement_for_patient(patient, date, value, cursor=None):
 
 
 @with_connection_and_commit
-def create_measurements_for_patient(patient, dates_values, cursor=None):
+def create_measurements_for_patient(patient: Patient, dates_values: iter, cursor=None) -> List[Measurement]:
     """Creates a MEASUREMENT rows in db, creates Measurement object and adds it to patient measurements.
     :param patient - Patient class object
     :param dates_values - iterable of (date, value) tuples
@@ -49,7 +51,7 @@ def create_measurements_for_patient(patient, dates_values, cursor=None):
 
 
 @with_connection
-def get_measurements_for_patient_id(patient_id, cursor=None):
+def get_measurements_for_patient_id(patient_id: int, cursor=None) -> List[Measurement]:
     """Fetches measurements from db for a given patient_id."""
     cursor.execute("SELECT * FROM MEASUREMENT WHERE PATIENT_ID=?", (patient_id,))
     return [
@@ -59,14 +61,14 @@ def get_measurements_for_patient_id(patient_id, cursor=None):
 
 
 @with_connection_and_commit
-def delete_measurement_for_patient(patient, measurement, cursor=None):
+def delete_measurement_for_patient(patient: Patient, measurement: Measurement, cursor=None):
     """Deletes measurement for given patient both in db and object"""
     cursor.execute("DELETE FROM MEASUREMENT WHERE ID=?", (measurement.db_id,))
     patient.measurements.remove(measurement)
 
 
 @with_connection_and_commit
-def delete_all_measurements_for_patient(patient, cursor=None):
+def delete_all_measurements_for_patient(patient: Patient, cursor=None):
     """Deletes all measurements for given patient both in db and object"""
     cursor.executemany(
         "DELETE FROM MEASUREMENT WHERE ID=?", [(m.db_id,) for m in patient.measurements]
