@@ -1,11 +1,10 @@
+import logging
 from typing import List
 
 import db.measurement
 import db.prediction
 from data_model.Patient import Patient
 from db.util import with_connection, with_connection_and_commit
-
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 

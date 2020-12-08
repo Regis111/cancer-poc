@@ -1,6 +1,8 @@
+from datetime import date
+
 from data_model.TumorValue import TumorValue
 
-from datetime import date
+
 class Measurement(TumorValue):
     """For creation please us functions from db module instead of Python object creation"""
 
