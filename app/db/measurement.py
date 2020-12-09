@@ -11,7 +11,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection_and_commit
-def create_measurement_for_patient(patient: Patient, measurement_date: date, value: float, cursor=None) -> Measurement:
+def create_measurement_for_patient(
+    patient: Patient, measurement_date: date, value: float, cursor=None
+) -> Measurement:
     """Creates a MEASUREMENT row in db, creates Measurement object and adds it to patient measurements.
     :param patient - Patient class object
     :param measurement_date - datetime object
@@ -30,7 +32,9 @@ def create_measurement_for_patient(patient: Patient, measurement_date: date, val
 
 
 @with_connection_and_commit
-def create_measurements_for_patient(patient: Patient, dates_values: iter, cursor=None) -> List[Measurement]:
+def create_measurements_for_patient(
+    patient: Patient, dates_values: iter, cursor=None
+) -> List[Measurement]:
     """Creates a MEASUREMENT rows in db, creates Measurement object and adds it to patient measurements.
     :param patient - Patient class object
     :param dates_values - iterable of (date, value) tuples
@@ -55,13 +59,19 @@ def get_measurements_for_patient_id(patient_id: int, cursor=None) -> List[Measur
     """Fetches measurements from db for a given patient_id."""
     cursor.execute("SELECT * FROM MEASUREMENT WHERE PATIENT_ID=?", (patient_id,))
     return [
-        Measurement(measurement_id, datetime.strptime(measurement_date, DATE_FORMAT).date(), value)
+        Measurement(
+            measurement_id,
+            datetime.strptime(measurement_date, DATE_FORMAT).date(),
+            value,
+        )
         for measurement_id, measurement_date, value, _ in cursor.fetchall()
     ]
 
 
 @with_connection_and_commit
-def delete_measurement_for_patient(patient: Patient, measurement: Measurement, cursor=None):
+def delete_measurement_for_patient(
+    patient: Patient, measurement: Measurement, cursor=None
+):
     """Deletes measurement for given patient both in db and object"""
     cursor.execute("DELETE FROM MEASUREMENT WHERE ID=?", (measurement.db_id,))
     patient.measurements.remove(measurement)

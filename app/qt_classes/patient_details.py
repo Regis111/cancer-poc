@@ -1,4 +1,3 @@
-from db import measurement
 from PySide2.QtWidgets import (
     QPushButton,
     QVBoxLayout,
@@ -19,7 +18,6 @@ from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 
 from qt_classes.measurements_form import MeasurementsForm
-from qt_classes.prediction_view import PredictionView
 
 from db.measurement import delete_measurement_for_patient
 
@@ -34,8 +32,8 @@ class PatientDetailsView(QWidget):
         self.setWindowFlags(Qt.Window)
 
         tab_widget = QTabWidget()
-        tab_widget.addTab(PatientDetailsTab(patient), "Szczegóły pacjenta")
-        tab_widget.addTab(PatientMeasurementsTab(patient, ("MTD", "mm")), "Pomiary MTD")
+        tab_widget.addTab(DetailsTab(patient), "Szczegóły pacjenta")
+        tab_widget.addTab(MeasurementsTab(patient, ("MTD", "mm")), "Pomiary MTD")
 
         self.back_button = QPushButton("Wróć")
 
@@ -47,33 +45,27 @@ class PatientDetailsView(QWidget):
         self.setWindowTitle(f"Pacjent {patient.name} {patient.surname}")
 
 
-class PatientDetailsTab(QWidget):
+class DetailsTab(QWidget):
     def __init__(self, patient):
         QWidget.__init__(self)
         name_label = QLabel("Name:")
+
         name_label_value = QLabel(patient.name)
         name_label_value.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
 
-        surname_label = QLabel("Name:")
+        surname_label = QLabel("Surname:")
+
         surname_label_value = QLabel(patient.surname)
         surname_label_value.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
 
-        db_id_label = QLabel("DB id:")
-        db_id_label_value = QLabel(str(patient.db_id))
-        db_id_label_value.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
-
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(self)
         main_layout.addWidget(name_label)
         main_layout.addWidget(name_label_value)
         main_layout.addWidget(surname_label)
         main_layout.addWidget(surname_label_value)
-        main_layout.addWidget(db_id_label)
-        main_layout.addWidget(db_id_label_value)
-
-        self.setLayout(main_layout)
 
 
-class PatientMeasurementsTab(QWidget):
+class MeasurementsTab(QWidget):
     def __init__(self, patient, measurement):
         QWidget.__init__(self)
         self.patient = patient
@@ -83,20 +75,15 @@ class PatientMeasurementsTab(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
 
-        btn_ac_adduser = QAction(QIcon("icon/trend.png"), "Zobacz predykcję", self)
-        btn_ac_adduser.triggered.connect(self.setPredictionView)
-        btn_ac_adduser.setStatusTip("Zobacz predykcję")
-        self.toolbar.addAction(btn_ac_adduser)
+        add_measurement = QAction(QIcon("icon/plus.png"), "Dodaj pomiar", self)
+        add_measurement.triggered.connect(self.addMeasurementsForm)
+        add_measurement.setStatusTip("Dodaj pomiary")
+        self.toolbar.addAction(add_measurement)
 
-        btn_ac_search = QAction(QIcon("icon/plus.png"), "Dodaj pomiar", self)
-        btn_ac_search.triggered.connect(self.addMeasurementsForm)
-        btn_ac_search.setStatusTip("Dodaj pomiary")
-        self.toolbar.addAction(btn_ac_search)
-
-        btn_ac_delete = QAction(QIcon("icon/d1.png"), "Usuń pomiar", self)
-        btn_ac_delete.triggered.connect(self.deleteCurrentMeasurement)
-        btn_ac_delete.setStatusTip("Usuń pomiar")
-        self.toolbar.addAction(btn_ac_delete)
+        delete_measurement = QAction(QIcon("icon/d1.png"), "Usuń pomiar", self)
+        delete_measurement.triggered.connect(self.deleteCurrentMeasurement)
+        delete_measurement.setStatusTip("Usuń pomiar")
+        self.toolbar.addAction(delete_measurement)
 
         self.table = QTableWidget()
         self.table.setColumnCount(2)
@@ -111,16 +98,9 @@ class PatientMeasurementsTab(QWidget):
         self.add_measurements_button = QPushButton("Dodaj pomiar")
         self.prediction_button = QPushButton("Zobacz Predykcję")
 
-        self.right = QVBoxLayout()
-        self.right.setMargin(20)
-        self.right.addWidget(self.add_measurements_button)
-        self.right.addWidget(self.prediction_button)
-
-        main_layout = QHBoxLayout()
+        main_layout = QHBoxLayout(self)
         main_layout.setMenuBar(self.toolbar)
         main_layout.addWidget(self.table)
-
-        self.setLayout(main_layout)
 
     def fillTable(self, measurements):
         for m in measurements:
@@ -144,21 +124,20 @@ class PatientMeasurementsTab(QWidget):
         self.measurement_form = MeasurementsForm(self, self.patient)
         self.measurement_form.show()
 
-    def setPredictionView(self):
-        logging.debug("Entering PredictionView")
-        self.prediction_view = PredictionView(self.patient)
-        self.prediction_view.show()
-
     def deleteCurrentMeasurement(self):
         if self.table.rowCount() == 0:
             QMessageBox.warning(
-                self, "Usuwanie pomiaru", f"Brak danych w tabeli",
+                self,
+                "Usuwanie pomiaru",
+                f"Brak danych w tabeli",
             )
             return
         current_row = self.table.currentRow()
         if current_row == -1:
             QMessageBox.warning(
-                self, "Usuwanie pomiaru", f"Brak wskazania na żaden pomiar",
+                self,
+                "Usuwanie pomiaru",
+                f"Brak wskazania na żaden pomiar",
             )
             return
         measurement = self.patient.measurements[current_row]

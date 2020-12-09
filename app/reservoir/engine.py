@@ -31,14 +31,18 @@ def generate_prediction(measurements: List[Measurement]) -> List[Tuple]:
     return _transform_predictions(first_date, predictions)
 
 
-def _transform_measurements(first_date: datetime.date, measurements: List[Measurement]) -> List[tuple]:
+def _transform_measurements(
+    first_date: datetime.date, measurements: List[Measurement]
+) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
 
     return sorted((date_to_offset(m.date), m.value) for m in measurements)
 
 
-def _interpolate_missing_days(measurements: List[tuple]) -> Tuple[np.ndarray, np.ndarray]:
+def _interpolate_missing_days(
+    measurements: List[tuple],
+) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = len(x) - 1 if len(x) < 4 else 3
     spline_fun = make_interp_spline(x, y, k=spline_degree)

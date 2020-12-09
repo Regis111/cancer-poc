@@ -26,8 +26,6 @@ class PatientListView(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        self.items = 0
-
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
 
@@ -45,19 +43,14 @@ class PatientListView(QWidget):
         self.table.setColumnCount(len(self.columns))
         self.table.verticalHeader().setVisible(False)
 
-        self.data = get_all_patients()
-
-        self.table.setHorizontalHeaderLabels(self.columns)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setHorizontalHeaderLabels(self.columns)
 
-        self.fillTable()
+        self.reload()
 
-        # whole layout
-        layout = QHBoxLayout()
+        layout = QHBoxLayout(self)
         layout.setMenuBar(self.toolbar)
         layout.addWidget(self.table)
-
-        self.setLayout(layout)
 
     def fillTable(self):
         for patient in self.data:
@@ -80,20 +73,24 @@ class PatientListView(QWidget):
         self.patient_form = PatientForm()
         answer = self.patient_form.exec()
         if answer == QDialog.Accepted:
-            self.addPatient(self.patient_form.patient)
+            self.reload()
             logging.debug(f"Patient {self.patient_form.patient} added")
 
     def deleteCurrentPatient(self):
         if self.table.rowCount() == 0:
             QMessageBox.warning(
-                self, "Usuwanie pacjenta", f"Brak danych w tabeli",
+                self,
+                "Usuwanie pacjenta",
+                f"Brak danych w tabeli",
             )
             return
 
         current_row = self.table.currentRow()
         if current_row == -1:
             QMessageBox.warning(
-                self, "Usuwanie pacjenta", f"Brak wskazania na pacjenta",
+                self,
+                "Usuwanie pacjenta",
+                f"Brak wskazania na pacjenta",
             )
             return
 
@@ -105,5 +102,10 @@ class PatientListView(QWidget):
         )
         if answer == QMessageBox.Yes:
             delete_patient(patient)
-            self.table.removeRow(current_row)
+            self.reload()
             logging.debug("Deleting PatientForm")
+
+    def reload(self):
+        self.table.setRowCount(0)
+        self.data = get_all_patients()
+        self.fillTable()

@@ -1,8 +1,7 @@
 from PySide2.QtWidgets import (
-    QWidget,
     QDialog,
     QDoubleSpinBox,
-    QDateTimeEdit,
+    QDateEdit,
     QPushButton,
     QFormLayout,
     QHBoxLayout,
@@ -28,7 +27,7 @@ class MeasurementsForm(QDialog):
         self.form_layout = QFormLayout()
         measurement_layout = QHBoxLayout()
 
-        self.datetime_field = QDateTimeEdit()
+        self.date_field = QDateEdit()
 
         spin_box = QDoubleSpinBox()
         spin_box.setRange(0.0, 10000.0)
@@ -36,7 +35,7 @@ class MeasurementsForm(QDialog):
 
         self.measurement_field = spin_box
 
-        measurement_layout.addWidget(self.datetime_field)
+        measurement_layout.addWidget(self.date_field)
         measurement_layout.addWidget(self.measurement_field)
 
         self.form_layout.addRow(measurement_layout)
@@ -45,15 +44,21 @@ class MeasurementsForm(QDialog):
         buttons_layout.addWidget(self.exit_button)
         buttons_layout.addWidget(self.save_button)
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
         self.layout.addLayout(self.form_layout)
         self.layout.addLayout(buttons_layout)
 
-        self.setLayout(self.layout)
-
     def saveForm(self):
-        self.date = self.datetime_field.date().toPython()
+        self.date = self.date_field.date().toPython()
         self.value = self.measurement_field.value()
+
+        if any([self.date == m.date for m in self.patient.measurements]):
+            QMessageBox.warning(
+                self,
+                "Dodawanie pomiaru",
+                "Istnieje pomiar z tą datą",
+            )
+            return
         measurement = create_measurement_for_patient(
             self.patient, self.date, self.value
         )
