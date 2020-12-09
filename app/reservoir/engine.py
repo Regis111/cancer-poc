@@ -18,7 +18,7 @@ dtype = torch.double
 torch.set_default_dtype(dtype)
 
 
-def create_prediction(measurements: List[Measurement]) -> List[Tuple]:
+def generate_prediction(measurements: List[Measurement]) -> List[Tuple]:
     """Creates prediction for given measurements.
     Time range of generated predictions is the same as time range of measurements,
     i.e. it starts the day after the last measurement and lasts for the same number of days as
@@ -85,7 +85,7 @@ def test():
         Measurement(3, datetime.datetime(2020, 12, 2), 19),
 
     ]
-    print(create_prediction(measurements))
+    print(generate_prediction(measurements))
 
 
 if __name__ == '__main__':
