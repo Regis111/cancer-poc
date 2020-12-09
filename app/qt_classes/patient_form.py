@@ -1,16 +1,17 @@
 from PySide2.QtWidgets import (
-    QWidget,
+    QDialog,
     QLineEdit,
     QPushButton,
     QFormLayout,
     QMessageBox,
+    QHBoxLayout,
 )
 from db.patient import create_patient
 
 
-class PatientForm(QWidget):
+class PatientForm(QDialog):
     def __init__(self):
-        QWidget.__init__(self)
+        QDialog.__init__(self)
 
         self.firstname = QLineEdit()
         self.firstname.setMaxLength(20)
@@ -20,10 +21,17 @@ class PatientForm(QWidget):
         self.save_button = QPushButton("Zapisz")
         self.save_button.clicked.connect(self.save_form)
 
+        self.cancel_button = QPushButton("Anuluj")
+        self.cancel_button.clicked.connect(self.reject)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.cancel_button)
+        buttons_layout.addWidget(self.save_button)
+
         self.layout = QFormLayout()
         self.layout.addRow("Imię", self.firstname)
         self.layout.addRow("Nazwisko", self.surname)
-        self.layout.addRow(self.save_button)
+        self.layout.addRow(buttons_layout)
 
         self.setLayout(self.layout)
 
@@ -31,9 +39,10 @@ class PatientForm(QWidget):
         if not self.firstname.text().isalpha() or not self.surname.text().isalpha():
             QMessageBox.critical(
                 self,
-                "QMessageBox.critical()",
+                "QMessageBox.critica()",
                 "Imię i Nazwisko musi być złożone wyłącznie z liter",
                 QMessageBox.Abort,
             )
         else:
-            create_patient(self.firstname.text(), self.surname.text())
+            self.patient = create_patient(self.firstname.text(), self.surname.text())
+            self.accept()
