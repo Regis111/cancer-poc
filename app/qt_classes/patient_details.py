@@ -84,7 +84,7 @@ class PatientMeasurementsTab(QWidget):
         self.toolbar.setMovable(False)
 
         btn_ac_adduser = QAction(QIcon("icon/trend.png"), "Zobacz predykcję", self)
-        # btn_ac_adduser.triggered.connect(self.insert)
+        btn_ac_adduser.triggered.connect(self.setPredictionView)
         btn_ac_adduser.setStatusTip("Zobacz predykcję")
         self.toolbar.addAction(btn_ac_adduser)
 

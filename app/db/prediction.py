@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @with_connection_and_commit
-def create_prediction_for_patient(patient: Patient, creation_date: date, dates_values: iter, cursor=None) -> list:
+def create_prediction_for_patient(patient: Patient, creation_date: date, dates_values: iter, cursor=None) -> dict:
     """Creates a PREDICTION rows in db, creates Prediction object and adds it to patient predictions.
     :param patient - Patient class object
     :param creation_date - prediction creation date
@@ -32,7 +32,7 @@ def create_prediction_for_patient(patient: Patient, creation_date: date, dates_v
         prediction_value_id = cursor.lastrowid
         predictions.append(Prediction(prediction_value_id, value_date, value))
     patient.predictions[creation_date] = predictions
-    return predictions
+    return patient.predictions
 
 
 @with_connection
