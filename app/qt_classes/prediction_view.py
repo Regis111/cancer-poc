@@ -1,3 +1,5 @@
+import datetime
+
 from PySide2.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvas,
@@ -6,9 +8,10 @@ from matplotlib.backends.backend_qt5agg import (
 from matplotlib.figure import Figure
 
 from db.prediction import create_prediction_for_patient
-from reservoir.engine import generate_prediction_deep_esn, generate_prediction_subreservoir
+from reservoir.engine import (
+    generate_prediction_deep_esn,
+)
 from util import unzip
-import datetime
 
 
 class PredictionView(QWidget):

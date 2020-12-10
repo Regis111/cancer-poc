@@ -25,8 +25,8 @@ def init():
     cursor.execute(
         """CREATE TABLE IF NOT EXISTS PREDICTION
                     (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                     DATE_CREATED   TEXT NOT NULL,
-                     PATIENT_ID     INT NOT NULL,
+                     DATETIME_CREATED   TEXT NOT NULL,
+                     PATIENT_ID         INT  NOT NULL,
                      FOREIGN KEY(PATIENT_ID) REFERENCES PATIENT(ID));"""
     )
 
@@ -36,7 +36,10 @@ def init():
                     DATE           TEXT   NOT NULL,
                     VALUE          REAL   NOT NULL,
                     PREDICTION_ID  INT    NOT NULL,
-                    FOREIGN KEY(PREDICTION_ID) REFERENCES PREDICTION(ID));"""
+                    FOREIGN KEY(PREDICTION_ID) 
+                    REFERENCES PREDICTION(ID)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE);"""
     )
     conn.close()
     print("DB initialized successfully")
