@@ -5,8 +5,8 @@ from matplotlib.backends.backend_qt5agg import (
 )
 from matplotlib.figure import Figure
 
-from db.prediction import get_predictions_for_patient_id, create_prediction_for_patient
-from reservoir.engine import generate_prediction
+from db.prediction import create_prediction_for_patient
+from reservoir.engine import generate_prediction_deep_esn, generate_prediction_subreservoir
 from util import unzip
 import datetime
 
@@ -31,7 +31,7 @@ class PredictionView(QWidget):
     def loadPredictions(self):
         predictions = self.patient.predictions
         if not predictions:
-            dates_values = generate_prediction(self.patient.measurements)
+            dates_values = generate_prediction_deep_esn(self.patient.measurements)
             predictions = create_prediction_for_patient(
                 self.patient, datetime.datetime.now().date(), dates_values
             )
