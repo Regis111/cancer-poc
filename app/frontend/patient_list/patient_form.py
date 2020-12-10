@@ -8,6 +8,9 @@ from PySide2.QtWidgets import (
 )
 
 from db.patient import create_patient
+import logging
+
+
 
 
 class PatientForm(QDialog):

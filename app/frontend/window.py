@@ -2,8 +2,8 @@ import logging
 
 from PySide2.QtWidgets import QMainWindow
 
-from qt_classes.patient_details import PatientDetailsView
-from qt_classes.patient_list import PatientListView
+from frontend.patient_details.patient_details import PatientDetailsView
+from frontend.patient_list.patient_list import PatientListView
 
 
 class Window(QMainWindow):

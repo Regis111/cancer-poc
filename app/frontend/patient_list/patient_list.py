@@ -13,11 +13,11 @@ from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from db.patient import get_all_patients, delete_patient
 
-from qt_classes.patient_form import PatientForm
-
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+from frontend.patient_list.patient_form import PatientForm
+
+
 
 
 class PatientListView(QWidget):
@@ -98,7 +98,7 @@ class PatientListView(QWidget):
         answer = QMessageBox.question(
             self,
             "Usuwanie pacjenta",
-            f"Czy na pewno chcesz usunąć pacjenta {patient}?",
+            f"Czy na pewno chcesz usunąć pacjenta {patient}?",
         )
         if answer == QMessageBox.Yes:
             delete_patient(patient)

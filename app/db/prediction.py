@@ -7,7 +7,7 @@ from data_model.PredictionValue import PredictionValue
 from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
 
-logging.basicConfig(level=logging.DEBUG)
+
 
 
 @with_connection_and_commit

@@ -1,3 +1,5 @@
+import logging
+
 from PySide2.QtWidgets import (
     QDialog,
     QDoubleSpinBox,
@@ -8,7 +10,9 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QMessageBox,
 )
+
 from db.measurement import create_measurement_for_patient
+
 
 
 class MeasurementsForm(QDialog):

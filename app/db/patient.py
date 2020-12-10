@@ -6,7 +6,7 @@ import db.prediction
 from data_model.Patient import Patient
 from db.util import with_connection, with_connection_and_commit
 
-logging.basicConfig(level=logging.DEBUG)
+
 
 
 @with_connection
