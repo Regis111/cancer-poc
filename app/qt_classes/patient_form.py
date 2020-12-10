@@ -6,6 +6,7 @@ from PySide2.QtWidgets import (
     QMessageBox,
     QHBoxLayout,
 )
+
 from db.patient import create_patient
 
 
@@ -28,12 +29,10 @@ class PatientForm(QDialog):
         buttons_layout.addWidget(self.cancel_button)
         buttons_layout.addWidget(self.save_button)
 
-        self.layout = QFormLayout()
+        self.layout = QFormLayout(self)
         self.layout.addRow("Imię", self.firstname)
         self.layout.addRow("Nazwisko", self.surname)
         self.layout.addRow(buttons_layout)
-
-        self.setLayout(self.layout)
 
     def save_form(self):
         if not self.firstname.text().isalpha() or not self.surname.text().isalpha():

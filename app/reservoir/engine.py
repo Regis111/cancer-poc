@@ -1,4 +1,5 @@
 import datetime
+from datetime import date
 from typing import Tuple
 
 import numpy as np
@@ -18,15 +19,21 @@ dtype = torch.double
 torch.set_default_dtype(dtype)
 
 
-def generate_prediction_deep_esn(measurements: List[Measurement]) -> List[Tuple]:
-    return _generate_prediction(measurements, 'deepesn')
+def generate_prediction_deep_esn(
+    measurements: List[Measurement],
+) -> List[Tuple[date, float]]:
+    return _generate_prediction(measurements, "deepesn")
 
 
-def generate_prediction_subreservoir(measurements: List[Measurement]) -> List[Tuple]:
-    return _generate_prediction(measurements, 'deepsubreservoiresn')
+def generate_prediction_subreservoir(
+    measurements: List[Measurement],
+) -> List[Tuple[date, float]]:
+    return _generate_prediction(measurements, "deepsubreservoiresn")
 
 
-def _generate_prediction(measurements: List[Measurement], model: str) -> List[Tuple]:
+def _generate_prediction(
+    measurements: List[Measurement], model: str
+) -> List[Tuple[date, float]]:
     """Creates prediction for given measurements.
     Time range of generated predictions is the same as time range of measurements,
     i.e. it starts the day after the last measurement and lasts for the same number of days as
@@ -39,17 +46,21 @@ def _generate_prediction(measurements: List[Measurement], model: str) -> List[Tu
     return _transform_predictions(first_date, predictions)
 
 
-def _transform_measurements(first_date: datetime.date, measurements: List[Measurement]) -> List[tuple]:
+def _transform_measurements(
+    first_date: datetime.date, measurements: List[Measurement]
+) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
 
     return sorted((date_to_offset(m.date), m.value) for m in measurements)
 
 
-def _interpolate_missing_days(measurements: List[tuple]) -> Tuple[np.ndarray, np.ndarray]:
+def _interpolate_missing_days(
+    measurements: List[tuple],
+) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = len(x) - 1 if len(x) < 6 else 5
-    spline_fun = make_interp_spline(x, y, k=spline_degree)
+    spline_fun = make_interp_spline(x, y, k=3)
     dense_x = np.arange(x[0], x[-1] + 0.1, 0.1)
     dense_y = spline_fun(dense_x)
     dense_y = dense_y.astype(float)
@@ -62,7 +73,9 @@ def _to_tensor(array: np.ndarray) -> Tensor:
 
 
 def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
-    day_offsets_pred = np.arange(day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets) / 10, 0.1)
+    day_offsets_pred = np.arange(
+        day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets) / 10, 0.1
+    )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
     esn = _choose_model(model, len(day_offsets) // 2)
     esn.fit(x, y)
@@ -85,7 +98,7 @@ def _transform_predictions(first_date: datetime.date, predictions: List[tuple]):
 
 
 def _choose_model(model_name: str, transient: int):
-    if model_name == 'deepesn':
+    if model_name == "deepesn":
         return DeepESN(
             1,
             100,
@@ -95,7 +108,7 @@ def _choose_model(model_name: str, transient: int):
             activation=activation.relu(leaky_rate=0.4),
             transient=transient,
         )
-    elif model_name == 'deepsubreservoiresn':
+    elif model_name == "deepsubreservoiresn":
         return DeepSubreservoirESN(
             1,
             1,
@@ -105,7 +118,7 @@ def _choose_model(model_name: str, transient: int):
             activation=activation.relu(leaky_rate=0.4),
             transient=transient,
         )
-    raise Exception('Not supported model')
+    raise Exception("Not supported model")
 
 
 def test():
