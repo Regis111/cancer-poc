@@ -8,8 +8,6 @@ from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
 
 
-
-
 @with_connection_and_commit
 def create_measurement_for_patient(
     patient: Patient, measurement_date: date, value: float, cursor=None
@@ -24,6 +22,11 @@ def create_measurement_for_patient(
     cursor.execute(
         "INSERT INTO MEASUREMENT(DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?)",
         (measurement_date.strftime(DATE_FORMAT), value, patient.db_id),
+    )
+    logging.debug(
+        "Inserted measurement %s, %s",
+        measurement_date,
+        value,
     )
     measurement_id = cursor.lastrowid
     measurement = Measurement(measurement_id, measurement_date, value)
@@ -47,7 +50,11 @@ def create_measurements_for_patient(
             "INSERT INTO MEASUREMENT(DATE, VALUE, PATIENT_ID) VALUES (?, ?, ?)",
             (measurement_date.strftime(DATE_FORMAT), value, patient.db_id),
         )
-        logging.debug("Inserted measurement %s, %s", measurement_date, value)
+        logging.debug(
+            "Inserted measurement %s, %s",
+            measurement_date,
+            value,
+        )
         measurement_id = cursor.lastrowid
         measurements.append(Measurement(measurement_id, measurement_date, value))
     patient.measurements += measurements

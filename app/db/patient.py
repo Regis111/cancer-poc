@@ -7,8 +7,6 @@ from data_model.Patient import Patient
 from db.util import with_connection, with_connection_and_commit
 
 
-
-
 @with_connection
 def get_all_patients(cursor=None) -> List[Patient]:
     """Fetches all patients from db"""
