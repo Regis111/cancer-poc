@@ -20,8 +20,6 @@ from frontend.patient_details.measurements_form import MeasurementsForm
 import logging
 
 
-
-
 class MeasurementsTab(QWidget):
     def __init__(self, patient, measurement):
         QWidget.__init__(self)
@@ -49,7 +47,7 @@ class MeasurementsTab(QWidget):
             ["Data", f"{measurement_name} [{measurement_unit}]"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.verticalHeader().setVisible(False)
+        # self.table.verticalHeader().setVisible(False)
         self.fillTable(patient.measurements)
 
         self.add_measurements_button = QPushButton("Dodaj pomiar")

@@ -36,7 +36,7 @@ class PredictionsView(QWidget):
         self.axes.plot(
             m_dates,
             measurements_values,
-            ".",
+            "-o",
             color="black",
             label="Pomiary",
         )

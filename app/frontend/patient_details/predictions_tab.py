@@ -22,6 +22,7 @@ class PredictionsTab(QWidget):
     def __init__(self, patient):
         QWidget.__init__(self)
         self.patient = patient
+        self.prediction_views = set()
 
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
@@ -65,19 +66,24 @@ class PredictionsTab(QWidget):
         self.reload()
 
     def showPredictions(self):
-        chosen_predictions_datetimes: List[
-            datetime
-        ] = [datetime.fromisoformat(list_widget.text()) for list_widget in self.predictions_list.selectedItems()]
-        logging.debug(f"Selected predictions to graph: {[dt.isoformat() for dt in chosen_predictions_datetimes]}")
+        chosen_predictions_datetimes: List[datetime] = [
+            datetime.fromisoformat(list_widget.text())
+            for list_widget in self.predictions_list.selectedItems()
+        ]
+        logging.debug(
+            f"Selected predictions to graph: {[dt.isoformat() for dt in chosen_predictions_datetimes]}"
+        )
         chosen_predictions: Dict[datetime, List[PredictionValue]] = {
             prediction_datetime: prediction_value_list
             for prediction_datetime, prediction_value_list in self.patient.predictions.items()
             if prediction_datetime in chosen_predictions_datetimes
         }
-        self.predictions_view = PredictionsView(
+        predictions_view = PredictionsView(
             self.patient.measurements, chosen_predictions
         )
-        self.predictions_view.show()
+        predictions_view.show()
+        self.prediction_views.add(predictions_view)
+        logging.debug("Prediction views %s", self.prediction_views)
 
     def reload(self):
         self.predictions_list.clear()

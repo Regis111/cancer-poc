@@ -8,8 +8,6 @@ from db.config import DATE_FORMAT
 from db.util import with_connection, with_connection_and_commit
 
 
-
-
 @with_connection_and_commit
 def create_prediction_for_patient(
     patient: Patient,
