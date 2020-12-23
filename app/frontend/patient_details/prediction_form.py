@@ -6,21 +6,26 @@ from db.prediction import create_prediction_for_patient
 from reservoir.engine import (
     generate_prediction_subreservoir,
     generate_prediction_deep_esn,
+    generate_prediction_esn_base,
 )
-
-import logging
-
 
 
 class PredictionForm(QDialog):
+    base_esn_method = "ESN"
     deep_esn_method = "DeepESN"
-    sub_reservoir_method = "SubReservoir"
+    sub_reservoir_method = "SubReservoirESN"
+    name_to_impl = {
+        base_esn_method: generate_prediction_esn_base,
+        deep_esn_method: generate_prediction_deep_esn,
+        sub_reservoir_method: generate_prediction_subreservoir,
+    }
 
     def __init__(self, patient):
         QDialog.__init__(self)
         self.patient = patient
 
         self.choose_method = QComboBox()
+        self.choose_method.addItem(self.base_esn_method)
         self.choose_method.addItem(self.deep_esn_method)
         self.choose_method.addItem(self.sub_reservoir_method)
 
@@ -32,11 +37,8 @@ class PredictionForm(QDialog):
         layout.addWidget(self.predict_button)
 
     def generatePrediction(self):
-        method = self.choose_method.currentText()
-        date_values = (
-            generate_prediction_deep_esn(self.patient.measurements)
-            if method == self.deep_esn_method
-            else generate_prediction_subreservoir(self.patient.measurements)
-        )
+        method_name = self.choose_method.currentText()
+        prediction_fun = self.name_to_impl[method_name]
+        date_values = prediction_fun(self.patient.measurements)
         create_prediction_for_patient(self.patient, datetime.now(), date_values)
         self.accept()

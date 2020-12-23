@@ -5,7 +5,7 @@ from typing import Tuple
 import numpy as np
 import torch
 from esn import activation
-from esn.esn import DeepESN, DeepSubreservoirESN
+from esn.esn import DeepESN, DeepSubreservoirESN, SVDReadout, DeepESNCell, ESNBase
 from esn.initialization import *
 from scipy.interpolate import make_interp_spline
 
@@ -32,6 +32,12 @@ def generate_prediction_subreservoir(
         measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "deepsubreservoiresn")
+
+
+def generate_prediction_esn_base(
+        measurements: List[Measurement],
+) -> List[Tuple[date, float]]:
+    return _generate_prediction(measurements, "esnbase")
 
 
 def _generate_prediction(
@@ -88,7 +94,7 @@ def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
         day_offsets[-1], day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST, AUGMENTATION_DENSITY
     )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
-    esn = _choose_model(model, len(day_offsets) // 2)
+    esn = _choose_model(model, len(day_offsets))
     esn.fit(x, y)
     y_pred = []
     p = torch.from_numpy(values[-1:])
@@ -108,7 +114,7 @@ def _transform_predictions(first_date: datetime.date, predictions: List[tuple]):
     return [(offset_to_date(off), val) for off, val in predictions]
 
 
-def _choose_model(model_name: str, transient: int):
+def _choose_model(model_name: str, data_size: int):
     if model_name == "deepesn":
         return DeepESN(
             1,
@@ -117,7 +123,7 @@ def _choose_model(model_name: str, transient: int):
             num_layers=3,
             bias=False,
             activation=activation.relu(leaky_rate=0.4),
-            transient=transient,
+            transient=data_size // 2,
         )
     elif model_name == "deepsubreservoiresn":
         return DeepSubreservoirESN(
@@ -127,6 +133,12 @@ def _choose_model(model_name: str, transient: int):
             num_layers=2,
             bias=False,
             activation=activation.relu(leaky_rate=0.4),
-            transient=transient,
+            transient=data_size // 2,
+        )
+    elif model_name == "esnbase":
+        return ESNBase(
+            reservoir=DeepESNCell(1, hidden_size=60, bias=False, activation=activation.relu(leaky_rate=0.4)),
+            readout=SVDReadout(60, 1),
+            transient=(data_size * 2) // 3
         )
     raise Exception("Not supported model")
