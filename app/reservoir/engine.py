@@ -18,7 +18,7 @@ device = torch.device("cpu")
 dtype = torch.double
 torch.set_default_dtype(dtype)
 
-AUGMENTATION_CONST = 24
+AUGMENTATION_CONST = 10
 AUGMENTATION_DENSITY = 1 / AUGMENTATION_CONST
 
 
@@ -65,10 +65,10 @@ def _transform_measurements(
 
 
 def _choose_spline_degree(data_size: int) -> int:
-    if data_size == 3:
-        return 2
-    if data_size % 2 == 1:
-        return data_size - 2
+    if data_size == 5:
+        return 3
+    if data_size > 5:
+        return 5
     return data_size - 1
 
 
@@ -91,7 +91,7 @@ def _to_tensor(array: np.ndarray) -> Tensor:
 
 def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
     day_offsets_pred = np.arange(
-        day_offsets[-1], day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST, AUGMENTATION_DENSITY
+        day_offsets[-1], day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST / 2, AUGMENTATION_DENSITY
     )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
     esn = _choose_model(model, len(day_offsets))
@@ -137,8 +137,8 @@ def _choose_model(model_name: str, data_size: int):
         )
     elif model_name == "esnbase":
         return ESNBase(
-            reservoir=DeepESNCell(1, hidden_size=60, bias=False, activation=activation.relu(leaky_rate=0.4)),
-            readout=SVDReadout(60, 1),
+            reservoir=DeepESNCell(1, hidden_size=100, bias=False, activation=activation.relu(leaky_rate=0.4)),
+            readout=SVDReadout(100, 1),
             transient=(data_size * 2) // 3
         )
     raise Exception("Not supported model")
