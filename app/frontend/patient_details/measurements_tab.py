@@ -15,9 +15,11 @@ from PySide2.QtWidgets import (
 )
 
 from db.measurement import delete_measurement_for_patient
-from qt_classes.measurements_form import MeasurementsForm
+from frontend.patient_details.measurements_form import MeasurementsForm
 
-logging.basicConfig(level=logging.DEBUG)
+import logging
+
+
 
 
 class MeasurementsTab(QWidget):

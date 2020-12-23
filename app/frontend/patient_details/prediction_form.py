@@ -8,6 +8,9 @@ from reservoir.engine import (
     generate_prediction_deep_esn,
 )
 
+import logging
+
+
 
 class PredictionForm(QDialog):
     deep_esn_method = "DeepESN"

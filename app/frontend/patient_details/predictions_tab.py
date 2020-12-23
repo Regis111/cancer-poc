@@ -9,14 +9,13 @@ from PySide2.QtWidgets import (
     QAction,
     QToolBar,
     QListWidget,
+    QAbstractItemView,
 )
 
 from data_model.PredictionValue import PredictionValue
 from db.prediction import delete_prediction_for_patient
-from qt_classes.prediction_form import PredictionForm
-from qt_classes.prediction_view import PredictionView
-
-logging.basicConfig(level=logging.DEBUG)
+from frontend.patient_details.prediction_form import PredictionForm
+from frontend.patient_details.prediction_view import PredictionsView
 
 
 class PredictionsTab(QWidget):
@@ -38,11 +37,12 @@ class PredictionsTab(QWidget):
         self.toolbar.addAction(delete_prediction)
 
         draw_predictions = QAction(QIcon("icon/trend.png"), "Rysuj predykcje", self)
-        # draw_predictions.triggered.connect(self.deleteCurrentMeasurement)
+        draw_predictions.triggered.connect(self.showPredictions)
         draw_predictions.setStatusTip("Rysuj predykcje")
         self.toolbar.addAction(draw_predictions)
 
         self.predictions_list = QListWidget()
+        self.predictions_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.fillList()
 
         main_layout = QHBoxLayout(self)
@@ -67,13 +67,14 @@ class PredictionsTab(QWidget):
     def showPredictions(self):
         chosen_predictions_datetimes: List[
             datetime
-        ] = self.predictions_list.selectedItems()
+        ] = [datetime.fromisoformat(list_widget.text()) for list_widget in self.predictions_list.selectedItems()]
+        logging.debug(f"Selected predictions to graph: {[dt.isoformat() for dt in chosen_predictions_datetimes]}")
         chosen_predictions: Dict[datetime, List[PredictionValue]] = {
             prediction_datetime: prediction_value_list
             for prediction_datetime, prediction_value_list in self.patient.predictions.items()
             if prediction_datetime in chosen_predictions_datetimes
         }
-        self.predictions_view = PredictionView(
+        self.predictions_view = PredictionsView(
             self.patient.measurements, chosen_predictions
         )
         self.predictions_view.show()
