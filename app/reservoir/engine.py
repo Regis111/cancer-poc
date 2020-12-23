@@ -18,21 +18,24 @@ device = torch.device("cpu")
 dtype = torch.double
 torch.set_default_dtype(dtype)
 
+AUGMENTATION_CONST = 24
+AUGMENTATION_DENSITY = 1 / AUGMENTATION_CONST
+
 
 def generate_prediction_deep_esn(
-    measurements: List[Measurement],
+        measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "deepesn")
 
 
 def generate_prediction_subreservoir(
-    measurements: List[Measurement],
+        measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "deepsubreservoiresn")
 
 
 def _generate_prediction(
-    measurements: List[Measurement], model: str
+        measurements: List[Measurement], model: str
 ) -> List[Tuple[date, float]]:
     """Creates prediction for given measurements.
     Time range of generated predictions is the same as time range of measurements,
@@ -47,7 +50,7 @@ def _generate_prediction(
 
 
 def _transform_measurements(
-    first_date: datetime.date, measurements: List[Measurement]
+        first_date: datetime.date, measurements: List[Measurement]
 ) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
@@ -55,13 +58,21 @@ def _transform_measurements(
     return sorted((date_to_offset(m.date), m.value) for m in measurements)
 
 
+def _choose_spline_degree(data_size: int) -> int:
+    if data_size == 3:
+        return 2
+    if data_size % 2 == 1:
+        return data_size - 2
+    return data_size - 1
+
+
 def _interpolate_missing_days(
-    measurements: List[tuple],
+        measurements: List[tuple],
 ) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
-    spline_degree = len(x) - 1 if len(x) < 4 else 3
+    spline_degree = _choose_spline_degree(len(x))
     spline_fun = make_interp_spline(x, y, k=spline_degree)
-    dense_x = np.arange(x[0], x[-1] + 0.1, 0.1)
+    dense_x = np.arange(x[0], x[-1] + AUGMENTATION_DENSITY, AUGMENTATION_DENSITY)
     dense_y = spline_fun(dense_x)
     dense_y = dense_y.astype(float)
     return dense_x, dense_y
@@ -74,7 +85,7 @@ def _to_tensor(array: np.ndarray) -> Tensor:
 
 def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
     day_offsets_pred = np.arange(
-        day_offsets[-1] + 1, day_offsets[-1] + len(day_offsets) / 10, 0.1
+        day_offsets[-1], day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST, AUGMENTATION_DENSITY
     )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
     esn = _choose_model(model, len(day_offsets) // 2)
@@ -87,7 +98,7 @@ def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
         p = esn(p)
         p = torch.reshape(p, (1, 1, 1))
         y_pred.append(p.item())
-    return list(zip(np.around(day_offsets_pred[::10]), y_pred[::10]))
+    return list(zip(np.around(day_offsets_pred[::AUGMENTATION_CONST]), y_pred[::AUGMENTATION_CONST]))
 
 
 def _transform_predictions(first_date: datetime.date, predictions: List[tuple]):
@@ -119,17 +130,3 @@ def _choose_model(model_name: str, transient: int):
             transient=transient,
         )
     raise Exception("Not supported model")
-
-
-def test():
-    measurements = [
-        Measurement(1, datetime.date(2020, 11, 20), 10),
-        Measurement(2, datetime.date(2020, 11, 25), 15),
-        Measurement(3, datetime.date(2020, 11, 30), 17),
-        Measurement(3, datetime.date(2020, 12, 2), 19),
-    ]
-    print(generate_prediction_subreservoir(measurements))
-
-
-if __name__ == "__main__":
-    test()
