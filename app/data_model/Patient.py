@@ -1,8 +1,7 @@
+from data_model.Prediction import Prediction
 from data_model.Measurement import Measurement
-from data_model.PredictionValue import PredictionValue
 
 from typing import List, Dict
-from datetime import datetime
 
 
 class Patient:
@@ -14,7 +13,7 @@ class Patient:
         name: str,
         surname: str,
         measurements: List[Measurement],
-        predictions: Dict[datetime, List[PredictionValue]],
+        predictions: List[Prediction],
     ):
         self.db_id = db_id
         self.name = name

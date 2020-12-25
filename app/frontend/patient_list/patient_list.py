@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import (
     QWidget,
     QTableWidget,
+    QAbstractItemView,
     QHeaderView,
     QTableWidgetItem,
     QHBoxLayout,
@@ -16,8 +17,6 @@ from db.patient import get_all_patients, delete_patient
 import logging
 
 from frontend.patient_list.patient_form import PatientForm
-
-
 
 
 class PatientListView(QWidget):
@@ -40,6 +39,7 @@ class PatientListView(QWidget):
         self.toolbar.addAction(btn_ac_delete)
 
         self.table = QTableWidget()
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setColumnCount(len(self.columns))
         self.table.verticalHeader().setVisible(False)
 

@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt5agg import (
 )
 from util import unzip
 
+from db.config import DATETIME_FORMAT
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 from matplotlib.figure import Figure
 
@@ -14,13 +15,16 @@ from matplotlib.figure import Figure
 class PredictionsView(QWidget):
     """View for drawing chosen already generated predictions"""
 
+
     def __init__(self, measurements, predictions):
         QWidget.__init__(self)
         self.colors = ["yellow", "red", "cyan", "magenta", "green", "blue"]
         self.resize(1500, 800)
 
-        self.predictions = predictions
         self.measurements = measurements
+        self.predictions = predictions
+
+        logging.debug("Predictions number: %d", len(self.predictions))
 
         self.canvas = FigureCanvas(Figure(figsize=(5, 3)))
 
@@ -40,17 +44,15 @@ class PredictionsView(QWidget):
             color="black",
             label="Pomiary",
         )
-
-        for prediction_datetime, prediction_value_list in self.predictions.items():
+        for prediction in self.predictions:
             color = self.colors.pop()
-            dates, prediction_values = unzip(
-                [(p.date, p.value) for p in prediction_value_list]
-            )
+            dates = [pv.date for pv in prediction.prediction_values]
+            prediction_values = [pv.value for pv in prediction.prediction_values]
             self.axes.plot(
                 dates,
                 prediction_values,
                 ".",
                 color=color,
-                label=f"Predykcja z {prediction_datetime.isoformat()}",
+                label=f"{prediction.method} {prediction.datetime_created.strftime(DATETIME_FORMAT)}",
             )
         self.axes.legend()
