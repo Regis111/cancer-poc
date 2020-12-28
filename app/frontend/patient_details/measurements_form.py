@@ -14,7 +14,6 @@ from PySide2.QtWidgets import (
 from db.measurement import create_measurement_for_patient
 
 
-
 class MeasurementsForm(QDialog):
     def __init__(self, parent, patient):
         QDialog.__init__(self)
@@ -54,7 +53,7 @@ class MeasurementsForm(QDialog):
 
     def saveForm(self):
         self.date = self.date_field.date().toPython()
-        self.value = self.measurement_field.value()
+        self.value = round(self.measurement_field.value(), 1)
 
         if any([self.date == m.date for m in self.patient.measurements]):
             QMessageBox.warning(
