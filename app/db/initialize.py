@@ -26,6 +26,7 @@ def init():
         """CREATE TABLE IF NOT EXISTS PREDICTION
                     (ID INTEGER PRIMARY KEY AUTOINCREMENT,
                      DATETIME_CREATED   TEXT NOT NULL,
+                     METHOD             TEXT NOT NULL,
                      PATIENT_ID         INT  NOT NULL,
                      FOREIGN KEY(PATIENT_ID) REFERENCES PATIENT(ID));"""
     )

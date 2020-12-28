@@ -9,6 +9,7 @@ from reservoir.engine import (
     generate_prediction_esn_base,
 )
 
+import logging
 
 class PredictionForm(QDialog):
     base_esn_method = "ESN"
@@ -20,8 +21,9 @@ class PredictionForm(QDialog):
         sub_reservoir_method: generate_prediction_subreservoir,
     }
 
-    def __init__(self, patient):
+    def __init__(self, parent, patient):
         QDialog.__init__(self)
+        self.parent = parent
         self.patient = patient
 
         self.choose_method = QComboBox()
@@ -40,5 +42,7 @@ class PredictionForm(QDialog):
         method_name = self.choose_method.currentText()
         prediction_fun = self.name_to_impl[method_name]
         date_values = prediction_fun(self.patient.measurements)
-        create_prediction_for_patient(self.patient, datetime.now(), date_values)
+        p = create_prediction_for_patient(self.patient, method_name, datetime.now().replace(microsecond=0), date_values)
+        logging.debug("Generated prediction %s", p)
+        self.parent.addPrediction(p)
         self.accept()
