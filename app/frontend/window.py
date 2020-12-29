@@ -11,6 +11,7 @@ class Window(QMainWindow):
         QMainWindow.__init__(self)
         self.width = 800
         self.height = 600
+        self.setWindowTitle("Cancer Prediction Tool")
 
         self.resize(self.width, self.height)
         self.setListView()
@@ -20,7 +21,7 @@ class Window(QMainWindow):
         self.widget = PatientListView()
         self.setCentralWidget(self.widget)
         self.widget.table.cellDoubleClicked.connect(
-            lambda row, column: self.setDetailsView(self.widget.data[row])
+            lambda row, _: self.setDetailsView(self.widget.data[row])
         )
         self.show()
 

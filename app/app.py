@@ -7,7 +7,6 @@ from frontend.window import Window
 import logging
 
 if __name__ == "__main__":
-
     logging.basicConfig(level=logging.DEBUG)
     init()
     app = QApplication(sys.argv)

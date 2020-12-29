@@ -11,8 +11,6 @@ from db.patient import create_patient
 import logging
 
 
-
-
 class PatientForm(QDialog):
     def __init__(self):
         QDialog.__init__(self)
