@@ -1,14 +1,15 @@
 import datetime
 from datetime import date
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import torch
 from esn import activation
 from esn.esn import DeepESN, DeepSubreservoirESN, SVDReadout, DeepESNCell, ESNBase
-from esn.initialization import *
-from scipy.interpolate import make_interp_spline
 
+from esn.initialization import WeightInitializer, SubreservoirWeightInitializer
+from scipy.interpolate import make_interp_spline
+from torch import Tensor
 from data_model.Measurement import Measurement
 from util import unzip
 
@@ -23,25 +24,25 @@ AUGMENTATION_DENSITY = 1 / AUGMENTATION_CONST
 
 
 def generate_prediction_deep_esn(
-        measurements: List[Measurement],
+    measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "deepesn")
 
 
 def generate_prediction_subreservoir(
-        measurements: List[Measurement],
+    measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "deepsubreservoiresn")
 
 
 def generate_prediction_esn_base(
-        measurements: List[Measurement],
+    measurements: List[Measurement],
 ) -> List[Tuple[date, float]]:
     return _generate_prediction(measurements, "esnbase")
 
 
 def _generate_prediction(
-        measurements: List[Measurement], model: str
+    measurements: List[Measurement], model: str
 ) -> List[Tuple[date, float]]:
     """Creates prediction for given measurements.
     Time range of generated predictions is the same as time range of measurements,
@@ -56,7 +57,7 @@ def _generate_prediction(
 
 
 def _transform_measurements(
-        first_date: datetime.date, measurements: List[Measurement]
+    first_date: datetime.date, measurements: List[Measurement]
 ) -> List[tuple]:
     def date_to_offset(date):
         return (date - first_date).days
@@ -73,7 +74,7 @@ def _choose_spline_degree(data_size: int) -> int:
 
 
 def _interpolate_missing_days(
-        measurements: List[tuple],
+    measurements: List[tuple],
 ) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = _choose_spline_degree(len(x))
@@ -91,7 +92,9 @@ def _to_tensor(array: np.ndarray) -> Tensor:
 
 def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
     day_offsets_pred = np.arange(
-        day_offsets[-1], day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST / 2, AUGMENTATION_DENSITY
+        day_offsets[-1],
+        day_offsets[-1] + len(day_offsets) / AUGMENTATION_CONST / 2,
+        AUGMENTATION_DENSITY,
     )
     x, y = _to_tensor(values[:-1]), _to_tensor(values[1:])
     esn = _choose_model(model, len(day_offsets))
@@ -104,7 +107,12 @@ def _predict(day_offsets: np.ndarray, values: np.ndarray, model) -> List[tuple]:
         p = esn(p)
         p = torch.reshape(p, (1, 1, 1))
         y_pred.append(p.item())
-    return list(zip(np.around(day_offsets_pred[::AUGMENTATION_CONST]), y_pred[::AUGMENTATION_CONST]))
+    return list(
+        zip(
+            np.around(day_offsets_pred[::AUGMENTATION_CONST]),
+            y_pred[::AUGMENTATION_CONST],
+        )
+    )
 
 
 def _transform_predictions(first_date: datetime.date, predictions: List[tuple]):
@@ -137,8 +145,13 @@ def _choose_model(model_name: str, data_size: int):
         )
     elif model_name == "esnbase":
         return ESNBase(
-            reservoir=DeepESNCell(1, hidden_size=100, bias=False, activation=activation.relu(leaky_rate=0.4)),
+            reservoir=DeepESNCell(
+                1,
+                hidden_size=100,
+                bias=False,
+                activation=activation.relu(leaky_rate=0.4),
+            ),
             readout=SVDReadout(100, 1),
-            transient=(data_size * 2) // 3
+            transient=(data_size * 2) // 3,
         )
     raise Exception("Not supported model")

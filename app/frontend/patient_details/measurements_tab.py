@@ -30,12 +30,16 @@ class MeasurementsTab(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
 
-        add_measurement = QAction(QIcon("icon/plus.png"), "Dodaj pomiar", self)
+        add_measurement = QAction(
+            QIcon("resources/icon/plus.png"), "Dodaj pomiar", self
+        )
         add_measurement.triggered.connect(self.addMeasurementsForm)
         add_measurement.setStatusTip("Dodaj pomiary")
         self.toolbar.addAction(add_measurement)
 
-        delete_measurement = QAction(QIcon("icon/d1.png"), "Usuń pomiar", self)
+        delete_measurement = QAction(
+            QIcon("resources/icon/d1.png"), "Usuń pomiar", self
+        )
         delete_measurement.triggered.connect(self.deleteCurrentMeasurement)
         delete_measurement.setStatusTip("Usuń pomiar")
         self.toolbar.addAction(delete_measurement)
@@ -47,7 +51,6 @@ class MeasurementsTab(QWidget):
             ["Data", f"{measurement_name} [{measurement_unit}]"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.table.verticalHeader().setVisible(False)
         self.fillTable(patient.measurements)
 
         self.add_measurements_button = QPushButton("Dodaj pomiar")

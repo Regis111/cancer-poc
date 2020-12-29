@@ -8,7 +8,6 @@ from PySide2.QtWidgets import (
 )
 
 
-
 class DetailsTab(QWidget):
     def __init__(self, patient):
         QWidget.__init__(self)

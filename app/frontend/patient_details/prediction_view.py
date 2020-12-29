@@ -8,13 +8,13 @@ from matplotlib.backends.backend_qt5agg import (
 from util import unzip
 
 from db.config import DATETIME_FORMAT
+
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 from matplotlib.figure import Figure
 
 
 class PredictionsView(QWidget):
     """View for drawing chosen already generated predictions"""
-
 
     def __init__(self, measurements, predictions):
         QWidget.__init__(self)

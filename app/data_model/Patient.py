@@ -1,7 +1,7 @@
 from data_model.Prediction import Prediction
 from data_model.Measurement import Measurement
 
-from typing import List, Dict
+from typing import List
 
 
 class Patient:

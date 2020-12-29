@@ -90,4 +90,8 @@ def delete_all_measurements_for_patient(patient: Patient, cursor=None):
     cursor.executemany(
         "DELETE FROM MEASUREMENT WHERE ID=?", [(m.db_id,) for m in patient.measurements]
     )
+    logging.debug(
+        "Removed all measurements of patient %s",
+        patient,
+    )
     patient.measurements.clear()

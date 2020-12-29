@@ -5,24 +5,34 @@ from db.measurement import (
 )
 from datetime import timedelta, date
 import pandas
+import argparse
+import logging
 
 
 def import_patient(
-    patient_no: str,
-    patient_no_name: str,
-    initial_date: date = date(2000, 1, 1),
-    density: int = 1,
-    measurements_stop: int = -1,
+    patient: int,
+    patient_name: str,
+    density: int,
+    measurements_stop: int,
 ):
-    df = pandas.read_csv(f"resources/abc_pat_{patient_no}.csv")
-    measurements_stop = measurements_stop if measurements_stop != -1 else df.index.stop
+    logging.debug(
+        "Importing patient %s with density equal %d and measurements_stop equal %d",
+        patient,
+        density,
+        measurements_stop,
+    )
+    initial_date: date = date(2000, 1, 1)
+    df = pandas.read_csv(f"resources/abc_pat_{patient}.csv")
+    measurements_stop = (
+        measurements_stop if measurements_stop != None else df.index.stop
+    )
     pat = [
         patient
         for patient in get_all_patients()
-        if patient.name == "ribba" and patient.surname == patient_no_name
+        if patient.name == "ribba" and patient.surname == patient_name
     ]
     if len(pat) == 0:
-        pat = create_patient("ribba", patient_no_name)
+        pat = create_patient("ribba", patient_name)
     else:
         pat = pat[0]
         delete_all_measurements_for_patient(pat)
@@ -36,6 +46,41 @@ def import_patient(
 
 
 if __name__ == "__main__":
-    # import_patient("2", "second", density=5)
-    # import_patient("8", "eighth")
-    import_patient("17", "seventeen", density=5)
+    logging.basicConfig(level=logging.DEBUG)
+    parser = argparse.ArgumentParser(description="import patient from resources/")
+    parser.add_argument(
+        "--patient",
+        "-p",
+        action="store",
+        choices=[2, 8, 17],
+        type=int,
+        required=True,
+        help="describes which person to import",
+    )
+    parser.add_argument(
+        "--patient_name",
+        "-pn",
+        action="store",
+        type=str,
+        required=True,
+        help="name of patient",
+    )
+    parser.add_argument(
+        "--density",
+        "-d",
+        action="store",
+        type=int,
+        default=1,
+        required=False,
+        help="describes frequency of imported data eg. density=3 means taking every 3rd value",
+    )
+    parser.add_argument(
+        "--measurements_stop",
+        "-ms",
+        action="store",
+        type=int,
+        required=False,
+        help="describes how many rows to import",
+    )
+    args = vars(parser.parse_args())
+    import_patient(**args)

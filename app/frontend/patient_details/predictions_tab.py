@@ -7,10 +7,6 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import (
     QWidget,
-    QHBoxLayout,
-    QAction,
-    QToolBar,
-    QWidget,
     QTableWidget,
     QAbstractItemView,
     QHeaderView,
@@ -36,17 +32,23 @@ class PredictionsTab(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
 
-        add_prediction = QAction(QIcon("icon/plus.png"), "Dodaj predykcję", self)
+        add_prediction = QAction(
+            QIcon("resources/icon/plus.png"), "Dodaj predykcję", self
+        )
         add_prediction.triggered.connect(self.addPredictionForm)
         add_prediction.setStatusTip("Dodaj pomiary")
         self.toolbar.addAction(add_prediction)
 
-        delete_prediction = QAction(QIcon("icon/d1.png"), "Usuń predykcję", self)
+        delete_prediction = QAction(
+            QIcon("resources/icon/d1.png"), "Usuń predykcję", self
+        )
         delete_prediction.triggered.connect(self.deletePrediction)
         delete_prediction.setStatusTip("Usuń pomiar")
         self.toolbar.addAction(delete_prediction)
 
-        draw_predictions = QAction(QIcon("icon/trend.png"), "Rysuj predykcje", self)
+        draw_predictions = QAction(
+            QIcon("resources/icon/trend.png"), "Rysuj predykcje", self
+        )
         draw_predictions.triggered.connect(self.showPredictions)
         draw_predictions.setStatusTip("Rysuj predykcje")
         self.toolbar.addAction(draw_predictions)
