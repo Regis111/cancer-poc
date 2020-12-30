@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+PySide2 = "==5.15.2"
+numpy = "==1.19.4"
+scipy = "==1.5.4"
+torch = "==1.7.0"
+matplotlib = "==3.3.3"
+deepecho = {editable = true,path = "./../DeepEcho"}
+
+[requires]
+python_version = "3"
