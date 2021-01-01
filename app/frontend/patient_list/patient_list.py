@@ -81,7 +81,7 @@ class PatientListView(QWidget):
             QMessageBox.warning(
                 self,
                 "Usuwanie pacjenta",
-                f"Brak danych w tabeli",
+                "Brak danych w tabeli",
             )
             return
 
@@ -90,7 +90,7 @@ class PatientListView(QWidget):
             QMessageBox.warning(
                 self,
                 "Usuwanie pacjenta",
-                f"Brak wskazania na pacjenta",
+                "Brak wskazania na pacjenta",
             )
             return
 

@@ -1,6 +1,7 @@
 import sqlite3
 
 import db.config as config
+import logging
 
 
 def init():
@@ -37,10 +38,10 @@ def init():
                     DATE           TEXT   NOT NULL,
                     VALUE          REAL   NOT NULL,
                     PREDICTION_ID  INT    NOT NULL,
-                    FOREIGN KEY(PREDICTION_ID) 
+                    FOREIGN KEY(PREDICTION_ID)
                     REFERENCES PREDICTION(ID)
                         ON UPDATE CASCADE
                         ON DELETE CASCADE);"""
     )
     conn.close()
-    print("DB initialized successfully")
+    logging.debug("DB initialized successfully")

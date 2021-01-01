@@ -96,7 +96,7 @@ class PredictionsTab(QWidget):
             QMessageBox.warning(
                 self,
                 "Usuwanie predykcji",
-                f"Brak danych w tabeli",
+                "Brak danych w tabeli",
             )
             return
         prediction_datetime = datetime.fromisoformat(

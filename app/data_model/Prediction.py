@@ -1,5 +1,5 @@
 from data_model.PredictionValue import PredictionValue
-from datetime import date, datetime
+from datetime import datetime
 from typing import List
 
 from db.config import DATETIME_FORMAT
