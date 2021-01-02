@@ -24,7 +24,7 @@ def import_patient(
     initial_date: date = date(2000, 1, 1)
     df = pandas.read_csv(f"resources/abc_pat_{patient}.csv")
     measurements_stop = (
-        measurements_stop if measurements_stop != None else df.index.stop
+        measurements_stop if measurements_stop is not None else df.index.stop
     )
     pat = [
         patient

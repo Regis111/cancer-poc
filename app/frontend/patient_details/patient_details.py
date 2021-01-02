@@ -1,6 +1,3 @@
-from db.measurement import get_measurements_for_patient_id
-import logging
-
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
     QPushButton,
@@ -12,8 +9,6 @@ from PySide2.QtWidgets import (
 from frontend.patient_details.details_tab import DetailsTab
 from frontend.patient_details.measurements_tab import MeasurementsTab
 from frontend.patient_details.predictions_tab import PredictionsTab
-
-import logging
 
 
 class PatientDetailsView(QWidget):

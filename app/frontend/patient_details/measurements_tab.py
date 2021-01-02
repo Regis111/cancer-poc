@@ -17,8 +17,6 @@ from PySide2.QtWidgets import (
 from db.measurement import delete_measurement_for_patient
 from frontend.patient_details.measurements_form import MeasurementsForm
 
-import logging
-
 
 class MeasurementsTab(QWidget):
     def __init__(self, patient, measurement):
@@ -87,7 +85,7 @@ class MeasurementsTab(QWidget):
             QMessageBox.warning(
                 self,
                 "Usuwanie pomiaru",
-                f"Brak danych w tabeli",
+                "Brak danych w tabeli",
             )
             return
         current_row = self.table.currentRow()
@@ -95,7 +93,7 @@ class MeasurementsTab(QWidget):
             QMessageBox.warning(
                 self,
                 "Usuwanie pomiaru",
-                f"Brak wskazania na żaden pomiar",
+                "Brak wskazania na żaden pomiar",
             )
             return
         measurement = self.patient.measurements[current_row]

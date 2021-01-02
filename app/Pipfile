@@ -4,13 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
+flake8 = "*"
 
 [packages]
-PySide2 = "==5.15.2"
-numpy = "==1.19.4"
-scipy = "==1.5.4"
-torch = "==1.7.0"
-matplotlib = "==3.3.3"
+PySide2 = "*"
+numpy = "*"
+scipy = "*"
+torch = "*"
+matplotlib = "*"
 deepecho = {editable = true,path = "./../DeepEcho"}
 
 [requires]
