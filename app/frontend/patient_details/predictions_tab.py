@@ -40,14 +40,14 @@ class PredictionsTab(QWidget):
         self.toolbar.addAction(add_prediction)
 
         delete_prediction = QAction(
-            QIcon("resources/icon/d1.png"), "Usuń predykcję", self
+            QIcon("resources/icon/trash-bin.png"), "Usuń predykcję", self
         )
         delete_prediction.triggered.connect(self.deletePrediction)
         delete_prediction.setStatusTip("Usuń pomiar")
         self.toolbar.addAction(delete_prediction)
 
         draw_predictions = QAction(
-            QIcon("resources/icon/trend.png"), "Rysuj predykcje", self
+            QIcon("resources/icon/graph.png"), "Rysuj predykcje", self
         )
         draw_predictions.triggered.connect(self.showPredictions)
         draw_predictions.setStatusTip("Rysuj predykcje")

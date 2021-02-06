@@ -36,7 +36,7 @@ class MeasurementsTab(QWidget):
         self.toolbar.addAction(add_measurement)
 
         delete_measurement = QAction(
-            QIcon("resources/icon/d1.png"), "Usuń pomiar", self
+            QIcon("resources/icon/trash-bin.png"), "Usuń pomiar", self
         )
         delete_measurement.triggered.connect(self.deleteCurrentMeasurement)
         delete_measurement.setStatusTip("Usuń pomiar")

@@ -12,7 +12,6 @@ class Window(QMainWindow):
         self.width = 800
         self.height = 600
         self.setWindowTitle("Cancer Prediction Tool")
-
         self.resize(self.width, self.height)
         self.setListView()
 

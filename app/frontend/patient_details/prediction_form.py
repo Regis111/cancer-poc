@@ -1,6 +1,12 @@
 from datetime import datetime
 
-from PySide2.QtWidgets import QComboBox, QPushButton, QVBoxLayout, QDialog
+from PySide2.QtWidgets import (
+    QComboBox,
+    QPushButton,
+    QVBoxLayout,
+    QDialog,
+    QStyledItemDelegate,
+)
 
 from db.prediction import create_prediction_for_patient
 from reservoir.engine import (
@@ -28,6 +34,7 @@ class PredictionForm(QDialog):
         self.patient = patient
 
         self.choose_method = QComboBox()
+        self.choose_method.setItemDelegate(QStyledItemDelegate())
         self.choose_method.addItem(self.base_esn_method)
         self.choose_method.addItem(self.deep_esn_method)
         self.choose_method.addItem(self.sub_reservoir_method)
