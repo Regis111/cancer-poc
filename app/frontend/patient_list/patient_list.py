@@ -28,12 +28,16 @@ class PatientListView(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
 
-        btn_ac_adduser = QAction(QIcon("resources/icon/add1.jpg"), "Add Patient", self)
+        btn_ac_adduser = QAction(
+            QIcon("resources/icon/add-user.png"), "Add Patient", self
+        )
         btn_ac_adduser.triggered.connect(self.addPatientForm)
         btn_ac_adduser.setStatusTip("Add Student")
         self.toolbar.addAction(btn_ac_adduser)
 
-        btn_ac_delete = QAction(QIcon("resources/icon/d1.png"), "Delete", self)
+        btn_ac_delete = QAction(
+            QIcon("resources/icon/remove-user.png"), "Delete Patient", self
+        )
         btn_ac_delete.triggered.connect(self.deleteCurrentPatient)
         btn_ac_delete.setStatusTip("Delete User")
         self.toolbar.addAction(btn_ac_delete)
@@ -42,6 +46,9 @@ class PatientListView(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setColumnCount(len(self.columns))
         self.table.verticalHeader().setVisible(False)
+
+        self.table.setAlternatingRowColors(True)
+        # self.table.setStyleSheet("alternate-background-color: blue;")
 
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setHorizontalHeaderLabels(self.columns)

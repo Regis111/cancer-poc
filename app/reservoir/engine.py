@@ -78,7 +78,7 @@ def _interpolate_missing_days(
 ) -> Tuple[np.ndarray, np.ndarray]:
     x, y = unzip(measurements)
     spline_degree = _choose_spline_degree(len(x))
-    spline_fun = make_interp_spline(x, y, k=spline_degree)
+    spline_fun = make_interp_spline(x, y, k=3)
     dense_x = np.arange(x[0], x[-1] + AUGMENTATION_DENSITY, AUGMENTATION_DENSITY)
     dense_y = spline_fun(dense_x)
     dense_y = dense_y.astype(float)
