@@ -15,6 +15,8 @@ matplotlib = "*"
 scikit-learn = "*"
 deepecho = {editable = true,path = "./../DeepEcho"}
 qdarkstyle = "*"
+pyabc = "==0.10.7"
+mypy = "*"
 
 [requires]
-python_version = "3"
+python_version = "3.8"

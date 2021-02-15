@@ -9,6 +9,7 @@ from PySide2.QtWidgets import (
 from frontend.patient_details.details_tab import DetailsTab
 from frontend.patient_details.measurements_tab import MeasurementsTab
 from frontend.patient_details.predictions_tab import PredictionsTab
+from frontend.patient_details.treatments_tab import TreatmentsTab
 
 
 class PatientDetailsView(QWidget):
@@ -20,6 +21,7 @@ class PatientDetailsView(QWidget):
         tab_widget.addTab(DetailsTab(patient), "Szczegóły pacjenta")
         tab_widget.addTab(MeasurementsTab(patient, ("MTD", "mm")), "Pomiary MTD")
         tab_widget.addTab(PredictionsTab(patient), "Predykcje MTD")
+        tab_widget.addTab(TreatmentsTab(patient), "Podania lekarstwa")
 
         self.back_button = QPushButton("Wróć")
 

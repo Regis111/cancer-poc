@@ -19,6 +19,7 @@ class PredictionsView(QWidget):
     def __init__(self, measurements, predictions):
         QWidget.__init__(self)
         self.colors = ["yellow", "red", "cyan", "magenta", "green", "blue"]
+        self.setWindowTitle("Widok predykcji")
         self.resize(1500, 800)
 
         self.measurements = measurements
