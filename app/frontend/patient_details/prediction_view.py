@@ -16,7 +16,7 @@ from matplotlib.figure import Figure
 class PredictionsView(QWidget):
     """View for drawing chosen already generated predictions"""
 
-    def __init__(self, measurements, predictions):
+    def __init__(self, patient_name, measurements, predictions):
         QWidget.__init__(self)
         self.colors = ["yellow", "red", "cyan", "magenta", "green", "blue"]
         self.setWindowTitle("Widok predykcji")
@@ -45,6 +45,7 @@ class PredictionsView(QWidget):
             color="black",
             label="Pomiary",
         )
+        self.axes.set_title(f"Rozwój nowotworu pacjent-a {patient_name}")
         for prediction in self.predictions:
             color = self.colors.pop()
             dates = [pv.date for pv in prediction.prediction_values]

@@ -129,7 +129,9 @@ class PredictionsTab(QWidget):
             type(chosen_predictions),
         )
         predictions_view = PredictionsView(
-            self.patient.measurements, chosen_predictions
+            f"{self.patient.name} {self.patient.surname}",
+            self.patient.measurements,
+            chosen_predictions,
         )
         predictions_view.show()
         self.prediction_views.add(predictions_view)
