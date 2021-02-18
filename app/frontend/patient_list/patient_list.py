@@ -47,9 +47,6 @@ class PatientListView(QWidget):
         self.table.setColumnCount(len(self.columns))
         self.table.verticalHeader().setVisible(False)
 
-        self.table.setAlternatingRowColors(True)
-        # self.table.setStyleSheet("alternate-background-color: blue;")
-
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setHorizontalHeaderLabels(self.columns)
 

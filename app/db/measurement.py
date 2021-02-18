@@ -1,6 +1,6 @@
 import logging
 from datetime import date, datetime
-from typing import List
+from typing import List, Tuple
 
 from data_model.Measurement import Measurement
 from data_model.Patient import Patient
@@ -36,7 +36,7 @@ def create_measurement_for_patient(
 
 @with_connection_and_commit
 def create_measurements_for_patient(
-    patient: Patient, dates_values: iter, cursor=None
+    patient: Patient, dates_values: List[Tuple[date, float]], cursor=None
 ) -> List[Measurement]:
     """Creates a MEASUREMENT rows in db, creates Measurement object and adds it to patient measurements.
     :param patient - Patient class object

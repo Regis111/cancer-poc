@@ -9,41 +9,36 @@ from PySide2.QtWidgets import (
     QMessageBox,
 )
 
-from db.measurement import create_measurement_for_patient
+from db.treatment import create_treatment_for_patient
 
 
-class MeasurementsForm(QDialog):
+class TreatmentForm(QDialog):
     def __init__(self, parent, patient):
         QDialog.__init__(self)
         self.patient = patient
         self.parent = parent
-        self.setWindowTitle("Dodaj pomiar")
 
         self.save_button = QPushButton("Zapisz")
         self.save_button.clicked.connect(self.saveForm)
 
-        self.exit_button = QPushButton("Wyjdź")
-        self.exit_button.clicked.connect(self.accept)
-
         self.spin_boxes = []
         self.form_layout = QFormLayout()
-        measurement_layout = QHBoxLayout()
+        treatment_layout = QHBoxLayout()
 
         self.date_field = QDateEdit()
 
         spin_box = QDoubleSpinBox()
-        spin_box.setRange(0.0, 10000.0)
+        spin_box.setRange(0.0, 1.0)
         spin_box.setSingleStep(0.1)
 
-        self.measurement_field = spin_box
+        self.treatment_field = spin_box
 
-        measurement_layout.addWidget(self.date_field)
-        measurement_layout.addWidget(self.measurement_field)
+        treatment_layout.addWidget(self.date_field)
+        treatment_layout.addWidget(self.treatment_field)
 
-        self.form_layout.addRow(measurement_layout)
+        self.form_layout.addRow(treatment_layout)
 
         buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.exit_button)
         buttons_layout.addWidget(self.save_button)
 
         self.layout = QVBoxLayout(self)
@@ -52,16 +47,14 @@ class MeasurementsForm(QDialog):
 
     def saveForm(self):
         self.date = self.date_field.date().toPython()
-        self.value = round(self.measurement_field.value(), 1)
+        self.value = round(self.treatment_field.value(), 1)
 
-        if any([self.date == m.date for m in self.patient.measurements]):
+        if any([self.date == m.date for m in self.patient.treatments]):
             QMessageBox.warning(
                 self,
                 "Dodawanie pomiaru",
                 "Istnieje pomiar z tą datą",
             )
             return
-        measurement = create_measurement_for_patient(
-            self.patient, self.date, self.value
-        )
-        self.parent.addMeasurement(measurement)
+        treatment = create_treatment_for_patient(self.patient, self.date, self.value)
+        self.parent.addTreatment(treatment)

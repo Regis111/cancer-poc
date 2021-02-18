@@ -3,7 +3,6 @@ import logging
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import (
-    QPushButton,
     QWidget,
     QTableWidget,
     QHeaderView,
@@ -50,9 +49,6 @@ class MeasurementsTab(QWidget):
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.fillTable(patient.measurements)
-
-        self.add_measurements_button = QPushButton("Dodaj pomiar")
-        self.prediction_button = QPushButton("Zobacz Predykcję")
 
         main_layout = QHBoxLayout(self)
         main_layout.setMenuBar(self.toolbar)

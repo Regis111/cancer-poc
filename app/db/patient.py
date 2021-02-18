@@ -3,6 +3,7 @@ from typing import List
 
 import db.measurement
 import db.prediction
+import db.treatment
 from data_model.Patient import Patient
 from db.util import with_connection, with_connection_and_commit
 
@@ -15,7 +16,10 @@ def get_all_patients(cursor=None) -> List[Patient]:
     for patient_id, name, surname in cursor.fetchall():
         measurements = db.measurement.get_measurements_for_patient_id(patient_id)
         predictions = db.prediction.get_predictions_for_patient_id(patient_id)
-        patient = Patient(patient_id, name, surname, measurements, predictions)
+        treatments = db.treatment.get_treatments_for_patient_id(patient_id)
+        patient = Patient(
+            patient_id, name, surname, measurements, predictions, treatments
+        )
         patients.append(patient)
     return patients
 
@@ -31,7 +35,7 @@ def create_patient(name: str, surname: str, cursor=None) -> Patient:
     cursor.execute("INSERT INTO PATIENT(NAME, SURNAME) VALUES (?, ?)", (name, surname))
     logging.debug(f"Inserted patient {name} {surname}")
     patient_id = cursor.lastrowid
-    return Patient(patient_id, name, surname, [], {})
+    return Patient(patient_id, name, surname, [], [], [])
 
 
 @with_connection_and_commit

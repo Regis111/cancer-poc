@@ -33,6 +33,15 @@ def init():
     )
 
     cursor.execute(
+        """CREATE TABLE IF NOT EXISTS TREATMENT
+                    (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                     DATE               TEXT NOT NULL,
+                     AMOUNT             REAL NOT NULL,
+                     PATIENT_ID         INT  NOT NULL,
+                     FOREIGN KEY(PATIENT_ID) REFERENCES PATIENT(ID));"""
+    )
+
+    cursor.execute(
         """CREATE TABLE IF NOT EXISTS PREDICTION_VALUE
                    (ID INTEGER PRIMARY KEY AUTOINCREMENT,
                     DATE           TEXT   NOT NULL,
