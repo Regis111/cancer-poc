@@ -6,15 +6,16 @@ import numpy as np
 import json
 import pyabc
 import datetime
-from itertools import tee
+import operator
 from typing import List, Tuple
 from data_model.Measurement import Measurement
 from util import unzip
-
 from prediction.util import (
+    interpolate_missing_days,
     transform_measurements,
     transform_predictions,
     date_to_offset,
+    pairwise,
 )
 
 
@@ -45,11 +46,6 @@ def tumor_ode_solver(
 ):
     t_start, t_end = time_range
     model = tumor_model(params)
-
-    def pairwise(iterable):
-        a, b = tee(iterable)
-        next(b, None)
-        return zip(a, b)
 
     def t_space(s, e):
         return np.linspace(s, e, num=1 + int(round((e - s) / frequency)))
@@ -130,8 +126,9 @@ def prior(n_percent):
 
 def train_patient(
     pat_df,
-    training_time_range,
-    prediction_time_range,
+    training_time_range=(0, 10),
+    prediction_time_range=(-10, 40),
+    n_predictions=1,
     treatments=[],
     frequency=0.1,
     n_percent=10,
@@ -155,28 +152,55 @@ def train_patient(
     history = abc.run(minimum_epsilon=epsilon, max_nr_populations=populations)
 
     df, w = history.get_distribution()
-    best_ind = np.where(w == np.amax(w))
-    best_params = df.iloc[best_ind].squeeze()
+
+    best_inds = np.argpartition(w, -n_predictions)[-n_predictions:]
+
+    print(w)
+    print(best_inds, w[best_inds])
+
+    weights = sorted(
+        [*zip(best_inds, w[best_inds])], key=operator.itemgetter(1), reverse=True
+    )
+
+    print(weights)
+
+    best_inds_sorted = [weight[0] for weight in weights]
+
+    print(best_inds_sorted)
+
+    best_params = df.iloc[best_inds_sorted]
 
     return best_params, history
+
+
+def prepare_data(first_date: datetime.date, measurements: List[Measurement]):
+    date_measurements = transform_measurements(first_date, measurements)
+    df = pandas.DataFrame(
+        data={
+            "t": [i[0] for i in date_measurements],
+            "mtd": [i[1] for i in date_measurements],
+        }
+    )
+    xs, ys = interpolate_missing_days(date_measurements)
+    interpolated_df = pandas.DataFrame(data={"t": xs, "mtd": ys})
+    return df, interpolated_df
 
 
 def generate_prediction_abc_smc(
     measurements: List[Measurement],
     prediction_days_number: int,
     treatments: List[Treatment],
-) -> List[Tuple[datetime.date, float]]:
+) -> List[List[Tuple[datetime.date, float]]]:
     first_date = min(m.date for m in measurements)
-    last_date = max(m.date for m in measurements)
 
-    prediction_last_date = last_date + datetime.timedelta(days=prediction_days_number)
-    prediction_offset = date_to_offset(first_date, prediction_last_date)
-    xs, ys = unzip(transform_measurements(first_date, measurements))
+    _, interpol_df = prepare_data(first_date, measurements)
 
-    df = pandas.DataFrame(data={"t": xs, "mtd": ys})
+    start = 0
+    training_end = interpol_df["t"].iloc[-1]
+    prediction_end = training_end + int(round(0.1 * prediction_days_number))
 
-    training_time_range = (0, xs[-1])
-    prediction_time_range = (0, prediction_offset)
+    training_time_range = (start, training_end)
+    prediction_time_range = (start, prediction_end)
 
     transformed_treatments = [date_to_offset(first_date, t.date) for t in treatments]
 
@@ -188,18 +212,25 @@ def generate_prediction_abc_smc(
     print("train", training_time_range, train_treatments)
     print("predict", prediction_time_range, transformed_treatments)
 
-    params, _ = train_patient(
-        df,
+    params_df, _ = train_patient(
+        interpol_df,
         training_time_range,
         prediction_time_range,
+        n_predictions=8,
         treatments=train_treatments,
         n_percent=50,
-        populations=10,
+        populations=15,
     )
-    abc_df = tumor_ode_solver(
-        params,
-        time_range=prediction_time_range,
-        treatments=transformed_treatments,
-        final=True,
-    )
-    return transform_predictions(first_date, [*zip(abc_df["t"], abc_df["mtd"])])
+    abc_dfs = [
+        tumor_ode_solver(
+            params.squeeze(),
+            time_range=prediction_time_range,
+            treatments=transformed_treatments,
+        )
+        for _, params in params_df.iterrows()
+    ]
+    predictions = [
+        transform_predictions(first_date, [*zip(abc_df["t"], abc_df["mtd"])])
+        for abc_df in abc_dfs
+    ]
+    return predictions

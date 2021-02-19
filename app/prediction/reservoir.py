@@ -58,7 +58,6 @@ def _generate_prediction(
     :returns list of tuples (date, value)"""
     first_date = min(m.date for m in measurements)
     transformed_measurements = transform_measurements(first_date, measurements)
-    print("_g", transformed_measurements)
     x, y = interpolate_missing_days(transformed_measurements)
     predictions = _predict(x, y, model)
     return transform_predictions(first_date, predictions)

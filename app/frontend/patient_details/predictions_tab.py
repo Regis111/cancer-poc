@@ -56,9 +56,9 @@ class PredictionsTab(QWidget):
         self.table = QTableWidget()
         self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.setColumnCount(2)
+        self.table.setColumnCount(3)
 
-        self.table.setHorizontalHeaderLabels(["Data", "Metoda"])
+        self.table.setHorizontalHeaderLabels(["Id", "Data", "Metoda"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.verticalHeader().setVisible(False)
         self.fillTable()
@@ -73,13 +73,19 @@ class PredictionsTab(QWidget):
 
     def addPrediction(self, prediction: Prediction):
         row_count = self.table.rowCount()
+        print(prediction)
         self.table.insertRow(row_count)
         self.table.setItem(
             row_count,
             0,
+            self.tableWidgetItem(str(prediction.db_id)),
+        )
+        self.table.setItem(
+            row_count,
+            1,
             self.tableWidgetItem(prediction.datetime_created.strftime(DATETIME_FORMAT)),
         )
-        self.table.setItem(row_count, 1, self.tableWidgetItem(prediction.method))
+        self.table.setItem(row_count, 2, self.tableWidgetItem(prediction.method))
 
     def tableWidgetItem(self, value):
         item = QTableWidgetItem(value)
@@ -100,7 +106,7 @@ class PredictionsTab(QWidget):
             )
             return
         prediction_datetime = datetime.fromisoformat(
-            self.table.item(current_row, 0).text()
+            self.table.item(current_row, 1).text()
         )
         delete_prediction_for_patient(self.patient, prediction_datetime)
         self.table.removeRow(current_row)
@@ -112,15 +118,14 @@ class PredictionsTab(QWidget):
         )
         selected_rows = set([ind.row() for ind in self.table.selectedIndexes()])
         logging.debug("%s", selected_rows)
-        chosen_predictions_datetimes: List[datetime] = [
-            datetime.strptime(self.table.item(ind, 0).text(), DATETIME_FORMAT)
-            for ind in selected_rows
+        chosen_predictions_ids: List[int] = [
+            int(self.table.item(ind, 0).text()) for ind in selected_rows
         ]
-        logging.debug("Selected datetimes from table: %s", chosen_predictions_datetimes)
+        logging.debug("Selected db_ids from table: %s", chosen_predictions_ids)
         chosen_predictions: Set[Prediction] = {
             prediction
             for prediction in self.patient.predictions
-            if prediction.datetime_created in chosen_predictions_datetimes
+            if prediction.db_id in chosen_predictions_ids
         }
         logging.debug(
             "Selected predictions to graph: %s %d %s",

@@ -21,4 +21,4 @@ class Prediction:
         self.patient_id = patient_id
 
     def __str__(self):
-        return f"{self.method} {self.datetime_created.strftime(DATETIME_FORMAT)}"
+        return f"{self.db_id} {self.method} {self.datetime_created.strftime(DATETIME_FORMAT)}"
