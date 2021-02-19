@@ -7,9 +7,16 @@ from scipy.interpolate import make_interp_spline
 from data_model.Measurement import Measurement
 from util import unzip
 import operator
+from itertools import tee
 
 AUGMENTATION_CONST = 10
 AUGMENTATION_DENSITY = 1 / AUGMENTATION_CONST
+
+
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 
 def date_to_offset(first_date: date, date: date) -> float:

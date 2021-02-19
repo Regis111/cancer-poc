@@ -1,3 +1,4 @@
+from data_model.Prediction import Prediction
 from data_model.Treatment import Treatment
 from datetime import datetime
 from operator import attrgetter
@@ -137,16 +138,17 @@ class PredictionForm(QDialog):
         self.runnable.result.connect(self.handlePrediction)
         self.runnable.start()
 
-    def handlePrediction(self, date_values):
+    def handlePrediction(self, predictions):
         self.progress_dialog.close()
-        prediction = create_prediction_for_patient(
-            self.patient,
-            self.method_name,
-            datetime.now().replace(microsecond=0),
-            date_values,
-        )
-        logging.debug("Generated prediction %s", prediction)
-        self.parent.addPrediction(prediction)
+        for date_values in predictions:
+            prediction_obj: Prediction = create_prediction_for_patient(
+                self.patient,
+                self.method_name,
+                datetime.now().replace(microsecond=0),
+                date_values,
+            )
+            logging.debug("Generated prediction %s", prediction_obj)
+            self.parent.addPrediction(prediction_obj)
 
 
 class PredictionRunnable(QThread):
@@ -160,5 +162,5 @@ class PredictionRunnable(QThread):
         self.treatments = treatments
 
     def run(self):
-        date_values = self.method(self.measurements, self.length, self.treatments)
-        self.result.emit(date_values)
+        predictions = self.method(self.measurements, self.length, self.treatments)
+        self.result.emit(predictions)

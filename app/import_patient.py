@@ -11,6 +11,7 @@ import json
 from prediction.abc_smc import tumor_ode_solver
 from typing import Sequence
 from prediction.util import offset_to_date
+import pandas
 
 
 def import_patient(
@@ -42,6 +43,9 @@ def import_patient(
     first_date = date(2000, 1, 1)
     print(df["t"])
     dates = [offset_to_date(first_date, t) for t in df["t"]]
+
+    # df_dates = pandas.DataFrame(data={"mtd": df["mtd"], "t": dates})
+    # df_dates.to_csv(f"{patient_name}_{length}_{frequency}_{treatments}.csv")
     # print(dates)
     values = df["mtd"]
     dates_values = list(zip(dates, values))
